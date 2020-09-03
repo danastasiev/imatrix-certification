@@ -1,0 +1,1 @@
+export const BIND_DB_NAME = 'imatrix_bind';

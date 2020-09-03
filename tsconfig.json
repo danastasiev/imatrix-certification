@@ -1,20 +1,17 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
+    "target": "es2019",
+    "lib": ["es2019", "es2020.string", "es2020.symbol.wellknown", "webworker"],
     "module": "commonjs",
-    "esModuleInterop": true,
-    "target": "es6",
-    "noImplicitAny": true,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "sourceMap": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
     "outDir": "build",
-    "baseUrl": ".",
-    "paths": {
-      "*": [
-        "node_modules/*"
-      ]
-    }
+    "rootDir": "./src",
+    "strict": true
   },
   "include": [
     "src/**/*"
