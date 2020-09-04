@@ -11,11 +11,15 @@ import {transports, format} from 'winston';
 import {logger} from 'express-winston';
 import {DBProvider} from "./db/db-provider";
 
-(async () => {
-  try {
+export class AppHolder {
+  public app: express.Express;
+
+  constructor() {
+      this.app = express();
+  }
+  public async init(): Promise<void> {
     await Container.get(DBProvider).checkDbConnection();
-    const app = express();
-    app.use(logger({
+    this.app.use(logger({
       transports: [
         new transports.Console()
       ],
@@ -29,18 +33,13 @@ import {DBProvider} from "./db/db-provider";
     const router = express.Router();
     router.use(bodyParser.urlencoded({ extended: false }));
     router.use(bodyParser.json());
-    app.use('/', router);
+    this.app.use('/', router);
     useContainer(Container);
-    useExpressServer(app, {
+    useExpressServer(this.app, {
       defaultErrorHandler: false,
       controllers: [CertsRouter],
       middlewares: [ErrorHandler]
     });
-    app.listen( PORT, () => {
-      console.log( `server started at http://localhost:${ PORT }` );
-    } );
-  }catch (e) {
-    console.log(`Failed to start server: ${e}\n`);
-    process.exit(1)
+    this.app.set('port', PORT);
   }
-})();
+}

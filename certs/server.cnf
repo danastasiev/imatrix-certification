@@ -1,0 +1,34 @@
+[ req ]
+default_bits           = 4096
+days                   = 60
+distinguished_name     = req_distinguished_name
+attributes             = req_attributes
+prompt                 = no
+# The extensions to add to a certificate request - see [ v3_req ]
+req_extensions      = v3_req
+x509_extensions         = v3_req
+[ req_distinguished_name ]
+C                      = US
+ST                     = Nevada
+L                      = Zephyr Cove
+O                      = iMatryx
+OU                     = devs
+CN                     = *.imatryxsys.com
+emailAddress           = test@imatryxsys.com
+[ req_attributes ]
+challengePassword      = password
+[ v3_req ]
+# X509v3 extensions to add to a certificate request
+# See x509v3_config
+# The subjectAltName is where you give the names of extra web sites.
+# You may have more than one of these, so put in the section [ alt_names ]
+# If you do not have any extra names, comment the next line out.
+subjectAltName = @alt_names
+# List of all the other DNS names that the certificate should work for.
+# alt_names is a name of my own invention
+[ alt_names ]
+DNS.1 = localhost
+DNS.2 = *.imatryxsys.com
+[ issuer_info ]
+OCSP;URI.0 = http://ocsp.example.com/
+caIssuers;URI.0 = http://example.com/ca.cert

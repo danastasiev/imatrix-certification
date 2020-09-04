@@ -14,7 +14,7 @@ export class CertsService {
     constructor() {
         this.rootCaCrtPath = path.resolve(__dirname, '../../certs/rootCA.crt');
         this.rootCaKeyPath = path.resolve(__dirname, '../../certs/rootCA.key');
-        this.keyPassword = '1111'
+        this.keyPassword = 'test'
     }
     public signCert(csr: string, serialNumber: string): Promise<{cert: string; csrFileName: string}> {
         return new Promise((res, reject) => {
