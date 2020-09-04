@@ -5,7 +5,7 @@
   "main": "build/src/app.js",
   "scripts": {
     "build": "tsc --incremental",
-    "start": "node ./build/app.js",
+    "start": "node ./build/index.js",
     "copy:migrations": "copyfiles -f ./src/db/migrations/*.sql ./build/db/migrations"
   },
   "devDependencies": {
