@@ -22,6 +22,8 @@ export class CertsService {
             openssl([
                     'x509',
                     '-req',
+                    '-extensions',
+                    'v3_req',
                     '-in',
                     { name:csrFileName, buffer: Buffer.from(csr, 'utf8') },
                     '-CA',
