@@ -1,14 +1,9 @@
 import {
     Body,
     Controller,
-    Delete,
-    Get,
     HttpError,
-    Param,
     Post,
-    Put,
-    Req,
-    UseBefore
+    QueryParam
 } from "routing-controllers";
 import {CertsService} from "./certs.service";
 import {DeviceService} from "../device/device.service";
@@ -23,15 +18,17 @@ export class CertsRouter {
 
     @Post('/sign')
     public async sign(
-        @Body() body: IAssignCert
+        @Body() csr: string,
+        @QueryParam('serialNumber') serialNumber: string,
+        @QueryParam('macAddress') macAddress: string
     ): Promise<string>{
-        const payload = new AssignCert(body);
-        const {serialNumber, macAddress, csr} = payload;
-        const exists = await this.deviceService.doesDeviceExist(serialNumber, macAddress);
+        const payload = new AssignCert({csr, serialNumber, macAddress});
+        const {serialNumber: sn, macAddress: mac, csr: csrVerified} = payload;
+        const exists = await this.deviceService.doesDeviceExist(sn, mac);
         if (!exists) {
-            throw new HttpError(404, `Device does not exist: sn = ${serialNumber}, mac = ${macAddress}`);
+            throw new HttpError(404, `Device does not exist: sn = ${sn}, mac = ${mac}`);
         }
-        const {cert, csrFileName} = await this.certsService.signCert(csr, serialNumber);
+        const {cert, csrFileName} = await this.certsService.signCert(csrVerified, sn);
         this.certsService.removeCsrFile(csrFileName);
         return cert;
     }
