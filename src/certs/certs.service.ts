@@ -38,7 +38,7 @@ export class CertsService {
                     `pass:${this.keyPassword}`,
                     '-CAcreateserial',
                     '-days',
-                    '360',
+                    '12600',
                     '-sha256'],
                     (err: Buffer[], buffer: Buffer[])=> {
                         if (buffer.length === 0) {

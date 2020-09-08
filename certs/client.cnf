@@ -1,6 +1,6 @@
 [ req ]
 default_bits           = 4096
-days                   = 60
+days                   = 12600
 distinguished_name     = req_distinguished_name
 attributes             = req_attributes
 prompt                 = no
