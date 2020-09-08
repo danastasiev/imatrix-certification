@@ -11,9 +11,11 @@ export class CertsService {
     private rootCaCrtPath: string;
     private rootCaKeyPath: string;
     private keyPassword: string;
+    private clientCnf: string;
     constructor() {
         this.rootCaCrtPath = path.resolve(__dirname, '../../certs/rootCA.crt');
         this.rootCaKeyPath = path.resolve(__dirname, '../../certs/rootCA.key');
+        this.clientCnf = path.resolve(__dirname, '../../certs/client.cnf');
         this.keyPassword = 'test'
     }
     public signCert(csr: string, serialNumber: string): Promise<{cert: string; csrFileName: string}> {
@@ -22,6 +24,8 @@ export class CertsService {
             openssl([
                     'x509',
                     '-req',
+                    '-extfile',
+                    this.clientCnf,
                     '-extensions',
                     'v3_req',
                     '-in',
