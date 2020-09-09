@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {SystemSettings} from './system-settings.model';
 
-@Service()
+@Service('ConfigService')
 export class ConfigService {
     private readonly CONFIG_NAME = 'system-config.json';
     private systemSettings: SystemSettings;

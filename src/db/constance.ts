@@ -1,1 +1,2 @@
 export const BIND_DB_NAME = 'imatrix_bind';
+export const BIND_DB_NAME_TEST = 'imatrix_bind_test';

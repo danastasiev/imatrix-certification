@@ -1,5 +1,7 @@
 import * as Knex from 'knex';
-import {Service} from "typedi";
+import * as fs from 'fs';
+import * as path from 'path';
+import {Container, Inject, Service} from "typedi";
 import {ConfigService} from "../config";
 import {BIND_DB_NAME} from "./constance";
 
@@ -9,29 +11,35 @@ export class DBProvider {
     private host: string;
     private user: string;
     private password: string;
+
+    private testMigrationsFolder: string;
+
     constructor(
         private readonly configService: ConfigService
     ) {
-        this.host = configService.getDbHost();
-        this.user = configService.getDbUser();
-        this.password = configService.getDbPassword();
+        this.configService = Container.get(ConfigService);
+        this.host = this.configService.getDbHost();
+        this.user = this.configService.getDbUser();
+        this.password = this.configService.getDbPassword();
+        this.testMigrationsFolder = path.resolve(__dirname, './test-migrations');
     }
 
-    public async createDbConnection(dbName = BIND_DB_NAME): Promise<Knex> {
+    public async createDbConnection(dbName: string): Promise<Knex> {
         return Knex({
             client: 'mysql',
             connection: {
                 host: this.host,
                 user: this.user,
                 password: this.password,
-                database: dbName
+                database: dbName,
+                multipleStatements: true
             },
             pool: { min: 0, max: 7 }
         });
     }
 
     public async checkDbConnection(): Promise<void> {
-        const knex = await this.createDbConnection();
+        const knex = await this.createDbConnection(BIND_DB_NAME);
         await knex.raw('select * from device');
     }
 
@@ -47,18 +55,17 @@ export class DBProvider {
     //     return (await trxFinal.raw(rawQuery)).rows[0].exists;
     // }
     //
-    // private async runInitialSchemaMigration(
-    //     trxFinal: Knex | Knex.Transaction
-    // ): Promise<void> {
-    //     const schemaFiles: string[] = fs
-    //         .readdirSync(this.migrationsFolder)
-    //         .filter(filename => filename.includes('.sql'));
-    //     for (const filename of schemaFiles) {
-    //         const filePath = path.join(this.migrationsFolder, filename);
-    //         const fileContents = fs.readFileSync(filePath);
-    //         await trxFinal.raw(fileContents.toString());
-    //     }
-    // }
+    public async runInitialTestSchemaMigration(): Promise<void> {
+        const knex = await this.createDbConnection(BIND_DB_NAME);
+        const schemaFiles: string[] = fs
+            .readdirSync(this.testMigrationsFolder)
+            .filter(filename => filename.includes('.sql'));
+        for (const filename of schemaFiles) {
+            const filePath = path.join(this.testMigrationsFolder, filename);
+            const fileContents = fs.readFileSync(filePath);
+            await knex.raw(fileContents.toString());
+        }
+    }
     //
     // public async createInitialSchema(): Promise<void> {
     //     const trxFinal = await this.createDbConnection();

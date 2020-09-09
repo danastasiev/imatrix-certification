@@ -4,9 +4,11 @@
   "private": true,
   "main": "build/src/app.js",
   "scripts": {
-    "build": "tsc --incremental",
+    "build": "tsc --incremental && npm run copy:test-migrations",
     "start": "node ./build/index.js",
-    "copy:migrations": "copyfiles -f ./src/db/migrations/*.sql ./build/db/migrations"
+    "copy:migrations": "copyfiles -f ./src/db/migrations/*.sql ./build/db/migrations",
+    "copy:test-migrations": "copyfiles -f ./src/db/test-migrations/*.sql ./build/db/test-migrations",
+    "test": "node --expose-gc ./node_modules/jest-cli/bin/jest.js --testPathPattern=\".*\\.inttest\\.ts\" --runInBand --forceExit --detectOpenHandles --logHeapUsage"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -19,6 +21,7 @@
     "@types/uuid": "^7.0.2",
     "@types/joi": "^14.3.2",
     "@types/cors": "^2.8.6",
+    "@types/jest": "^24.0.11",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "copyfiles": "^2.1.0",
@@ -50,5 +53,20 @@
     "openssl-nodejs": "^1.0.5",
     "winston": "^3.0.0",
     "express-winston": "^4.0.4"
-  }
+  },
+  "jest": {
+  "testEnvironment": "node",
+  "transform": {
+    "^.+\\.tsx?$": "ts-jest"
+  },
+  "setupFiles": [
+    "<rootDir>src/test/setup-tests.ts"
+  ],
+  "testRegex": "(/(src)/(test)/.*(\\.|/)(inttest))\\.(js|ts)$",
+  "moduleFileExtensions": [
+    "js",
+    "ts",
+    "json"
+  ]
+}
 }

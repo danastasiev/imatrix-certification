@@ -10,6 +10,7 @@ import {ErrorHandler} from "./middlewares/error-handler";
 import {transports, format} from 'winston';
 import {logger} from 'express-winston';
 import {DBProvider} from "./db/db-provider";
+import {BIND_DB_NAME, BIND_DB_NAME_TEST} from "./db/constance";
 
 export class AppHolder {
   public app: express.Express;
@@ -19,6 +20,12 @@ export class AppHolder {
   }
   public async init(): Promise<void> {
     await Container.get(DBProvider).checkDbConnection();
+    if (process.env.IMATRIX_ENVIRONMENT === 'TEST') {
+      await this.setupTestEnvironment();
+    } else {
+      await this.setupDevelopmentEnvironment();
+    }
+
     this.app.use(logger({
       transports: [
         new transports.Console()
@@ -41,5 +48,15 @@ export class AppHolder {
       middlewares: [ErrorHandler]
     });
     this.app.set('port', PORT);
+  }
+
+  private async setupTestEnvironment(): Promise<void> {
+    await Container.get(DBProvider).runInitialTestSchemaMigration();
+    Container.set('bind-db-name', BIND_DB_NAME_TEST);
+    console.log('TEST environment setup process completed');
+  }
+  private async setupDevelopmentEnvironment(): Promise<void> {
+    Container.set('bind-db-name', BIND_DB_NAME);
+    console.log('DEVELOPMENT environment setup process completed');
   }
 }
