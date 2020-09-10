@@ -1,6 +1,6 @@
 [ req ]
 default_bits           = 4096
-days                   = 12600
+days                   = 12775
 distinguished_name     = req_distinguished_name
 attributes             = req_attributes
 prompt                 = no
@@ -20,7 +20,7 @@ subjectAltName = @alt_names
 # alt_names is a name of my own invention
 [ alt_names ]
 DNS.1 = localhost
-DNS.2 = *.imatrixsys.com
+DNS.2 = *.inventeksys.com
 [ issuer_info ]
 OCSP;URI.0 = http://ocsp.example.com/
 caIssuers;URI.0 = http://example.com/ca.cert

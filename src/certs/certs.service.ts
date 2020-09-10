@@ -9,32 +9,30 @@ import {IMATRIX_MANUFACTURER_ID, OTHER_MANUFACTURER_ID} from "./certs.constants"
 
 @Service()
 export class CertsService {
-    private certs: {[key: string] : { ca: string;  keyCa: string; password: string}};
-    private clientCnf: string;
+    private certs: {[key: string] : { ca: string;  keyCa: string; clientCnf: string}};
     constructor() {
         this.certs = {
             [IMATRIX_MANUFACTURER_ID]: {
                 ca: path.resolve(__dirname, '../../certs/client-certs/imatrix-rootCA.crt'),
                 keyCa: path.resolve(__dirname, '../../certs/client-certs/imatrix-rootCA.key'),
-                password: 'test'
+                clientCnf: path.resolve(__dirname, '../../certs/client-certs/imatrix-client.cnf')
             },
             [OTHER_MANUFACTURER_ID]: {
-                ca: path.resolve(__dirname, '../../certs/client-certs/other-rootCA.crt'),
-                keyCa: path.resolve(__dirname, '../../certs/client-certs/other-rootCA.key'),
-                password: 'test'
+                ca: path.resolve(__dirname, '../../certs/client-certs/inventek-rootCA.crt'),
+                keyCa: path.resolve(__dirname, '../../certs/client-certs/inventek-rootCA.key'),
+                clientCnf: path.resolve(__dirname, '../../certs/client-certs/inventek-client.cnf')
             },
         };
-        this.clientCnf = path.resolve(__dirname, '../../certs/client.cnf');
     }
     public signCert(csr: string, serialNumber: string, manufacturerId: string): Promise<{cert: string; csrFileName: string}> {
-        const { ca, keyCa, password } = this.certs[manufacturerId];
+        const { ca, keyCa, clientCnf } = this.certs[manufacturerId];
         return new Promise((res, reject) => {
             const csrFileName = `${serialNumber}.imatrixsys.com.scr`;
             openssl([
                     'x509',
                     '-req',
                     '-extfile',
-                    this.clientCnf,
+                    clientCnf,
                     '-extensions',
                     'v3_req',
                     '-in',
@@ -43,11 +41,9 @@ export class CertsService {
                     ca,
                     '-CAkey',
                     keyCa,
-                    '-passin',
-                    `pass:${password}`,
                     '-CAcreateserial',
                     '-days',
-                    '12600',
+                    '12784',
                     '-sha256'],
                     (err: Buffer[], buffer: Buffer[])=> {
                         if (buffer.length === 0) {
