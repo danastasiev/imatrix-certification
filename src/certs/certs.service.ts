@@ -4,21 +4,30 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {HttpError} from "routing-controllers";
 import {OPENSSL_DIR_NAME} from "../constants";
+import {IMATRIX_MANUFACTURER_ID, OTHER_MANUFACTURER_ID} from "./certs.constants";
 
 
 @Service()
 export class CertsService {
-    private rootCaCrtPath: string;
-    private rootCaKeyPath: string;
-    private keyPassword: string;
+    private certs: {[key: string] : { ca: string;  keyCa: string; password: string}};
     private clientCnf: string;
     constructor() {
-        this.rootCaCrtPath = path.resolve(__dirname, '../../certs/rootCA.crt');
-        this.rootCaKeyPath = path.resolve(__dirname, '../../certs/rootCA.key');
+        this.certs = {
+            [IMATRIX_MANUFACTURER_ID]: {
+                ca: path.resolve(__dirname, '../../certs/client-certs/imatrix-rootCA.crt'),
+                keyCa: path.resolve(__dirname, '../../certs/client-certs/imatrix-rootCA.key'),
+                password: 'test'
+            },
+            [OTHER_MANUFACTURER_ID]: {
+                ca: path.resolve(__dirname, '../../certs/client-certs/other-rootCA.crt'),
+                keyCa: path.resolve(__dirname, '../../certs/client-certs/other-rootCA.key'),
+                password: 'test'
+            },
+        };
         this.clientCnf = path.resolve(__dirname, '../../certs/client.cnf');
-        this.keyPassword = 'test'
     }
-    public signCert(csr: string, serialNumber: string): Promise<{cert: string; csrFileName: string}> {
+    public signCert(csr: string, serialNumber: string, manufacturerId: string): Promise<{cert: string; csrFileName: string}> {
+        const { ca, keyCa, password } = this.certs[manufacturerId];
         return new Promise((res, reject) => {
             const csrFileName = `${serialNumber}.imatrixsys.com.scr`;
             openssl([
@@ -31,11 +40,11 @@ export class CertsService {
                     '-in',
                     { name:csrFileName, buffer: Buffer.from(csr, 'utf8') },
                     '-CA',
-                    this.rootCaCrtPath,
+                    ca,
                     '-CAkey',
-                    this.rootCaKeyPath,
+                    keyCa,
                     '-passin',
-                    `pass:${this.keyPassword}`,
+                    `pass:${password}`,
                     '-CAcreateserial',
                     '-days',
                     '12600',

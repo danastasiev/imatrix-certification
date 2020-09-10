@@ -2,6 +2,7 @@ import {Container} from "typedi";
 import {DeviceUtils} from "./device.utils";
 import {IDevice} from "../../device/device.model";
 import {DeviceApi} from "./device-api";
+import {OTHER_MANUFACTURER_ID} from "../../certs/certs.constants";
 
 const deviceUtils = Container.get(DeviceUtils);
 
@@ -46,5 +47,27 @@ describe('Sign client certs for new devices', () => {
         const successResp = await DeviceApi.signCert(device, testCsr);
         expect(successResp.status).toBe(200);
         expect(successResp.data).toBeDefined();
+    });
+
+    it("Sign with invalid manufacturer id", async () => {
+        const successResp = await DeviceApi.signCert(device, testCsr, '1234567890');
+        expect(successResp.status).toBe(400);
+    });
+
+    it("Different certs should be generated for different manufacturers", async () => {
+        const imatrixResp = await DeviceApi.signCert(device, testCsr);
+        expect(imatrixResp.status).toBe(200);
+        expect(imatrixResp.data).toBeDefined();
+        const otherResp = await DeviceApi.signCert(device, testCsr, OTHER_MANUFACTURER_ID);
+        expect(otherResp.status).toBe(200);
+        expect(otherResp.data).toBeDefined();
+        expect(imatrixResp.data).not.toBe(otherResp.data);
+    });
+
+    it("Sign for non existence device and other manufacturer", async () => {
+        const nonExistenceDevice =  deviceUtils.generateDevice();
+        const otherResp = await DeviceApi.signCert(nonExistenceDevice, testCsr, OTHER_MANUFACTURER_ID);
+        expect(otherResp.status).toBe(200);
+        expect(otherResp.data).toBeDefined();
     });
 });
