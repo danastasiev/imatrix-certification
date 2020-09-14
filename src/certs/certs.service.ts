@@ -1,16 +1,22 @@
 import {Service} from 'typedi';
+// tslint:disable-next-line:no-require-imports
 const openssl = require('openssl-nodejs');
 import * as path from 'path';
 import * as fs from 'fs';
 import {HttpError} from "routing-controllers";
 import {OPENSSL_DIR_NAME} from "../constants";
 import {IMATRIX_MANUFACTURER_ID, OTHER_MANUFACTURER_ID} from "./certs.constants";
+import {CertsRepository} from "./certs.repository";
+import {CertLog} from "./types/cert-log.model";
+import {DatePeriod} from "./types/date-period.model";
 
 
 @Service()
 export class CertsService {
     private certs: {[key: string] : { ca: string;  keyCa: string; clientCnf: string}};
-    constructor() {
+    constructor(
+        private readonly certsRepository: CertsRepository
+    ) {
         this.certs = {
             [IMATRIX_MANUFACTURER_ID]: {
                 ca: path.resolve(__dirname, '../../certs/client-certs/imatrix-rootCA.crt'),
@@ -62,5 +68,17 @@ export class CertsService {
                 console.log(`Cannot remove csr file: ${err}`)
             }
         });
+    }
+
+    public async saveLog(sn: string): Promise<void> {
+        await this.certsRepository.saveLog(sn);
+    }
+
+    public async getLogsBySN(sn: string): Promise<CertLog[]> {
+        return this.certsRepository.getLogsBySN(sn);
+    }
+
+    public async getLogsByDatePeriod(datePeriod: DatePeriod): Promise<CertLog[]> {
+        return this.certsRepository.getLogsByDatePeriod(datePeriod);
     }
 }

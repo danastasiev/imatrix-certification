@@ -13,6 +13,7 @@ export class DBProvider {
     private password: string;
 
     private testMigrationsFolder: string;
+    private developmentMigrationsFolder: string;
 
     constructor(
         private readonly configService: ConfigService
@@ -22,6 +23,7 @@ export class DBProvider {
         this.user = this.configService.getDbUser();
         this.password = this.configService.getDbPassword();
         this.testMigrationsFolder = path.resolve(__dirname, './test-migrations');
+        this.developmentMigrationsFolder = path.resolve(__dirname, './migrations');
     }
 
     public async createDbConnection(dbName: string): Promise<Knex> {
@@ -56,12 +58,20 @@ export class DBProvider {
     // }
     //
     public async runInitialTestSchemaMigration(): Promise<void> {
+        await this.runInitialSchemaMigration(this.testMigrationsFolder);
+    }
+
+    public async runInitialDevelopmentSchemaMigration(): Promise<void> {
+        await this.runInitialSchemaMigration(this.developmentMigrationsFolder);
+    }
+
+    private async runInitialSchemaMigration(migrationFolder: string): Promise<void> {
         const knex = await this.createDbConnection(BIND_DB_NAME);
         const schemaFiles: string[] = fs
-            .readdirSync(this.testMigrationsFolder)
+            .readdirSync(migrationFolder)
             .filter(filename => filename.includes('.sql'));
         for (const filename of schemaFiles) {
-            const filePath = path.join(this.testMigrationsFolder, filename);
+            const filePath = path.join(migrationFolder, filename);
             const fileContents = fs.readFileSync(filePath);
             await knex.raw(fileContents.toString());
         }

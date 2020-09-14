@@ -56,6 +56,7 @@ export class AppHolder {
     console.log('TEST environment setup process completed');
   }
   private async setupDevelopmentEnvironment(): Promise<void> {
+    await Container.get(DBProvider).runInitialDevelopmentSchemaMigration();
     Container.set('bind-db-name', BIND_DB_NAME);
     console.log('DEVELOPMENT environment setup process completed');
   }

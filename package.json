@@ -4,7 +4,7 @@
   "private": true,
   "main": "build/src/app.js",
   "scripts": {
-    "build": "tsc --incremental && npm run copy:test-migrations",
+    "build": "tsc --incremental && npm run copy:test-migrations && npm run copy:migrations",
     "start": "node ./build/index.js",
     "copy:migrations": "copyfiles -f ./src/db/migrations/*.sql ./build/db/migrations",
     "copy:test-migrations": "copyfiles -f ./src/db/test-migrations/*.sql ./build/db/test-migrations",
