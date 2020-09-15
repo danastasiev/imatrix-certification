@@ -28,7 +28,7 @@ export class CertsRepository {
     public async getLogsByDatePeriod(datePeriod: DatePeriod): Promise<CertLog[]> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
         const { from, to } = datePeriod;
-        const resp = await knex.raw('select * from certs_log where issued_date between ? and ?;', [from, to]);
+        const resp = await knex.raw('select * from certs_log where issued_date between ? and ?;', [from.toISOString(), to.toISOString()]);
         const [ rows ] = resp;
         return rows.map((r: any) => ({serialNumber: r.sn, issuedDate: new Date(r.issued_date)}))
     }

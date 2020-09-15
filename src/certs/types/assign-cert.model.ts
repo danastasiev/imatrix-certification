@@ -8,20 +8,20 @@ export interface IAssignCert {
     csr: string;
     manufacturerId: string;
 }
+const schema = Joi.object({
+    serialNumber: Joi.string(),
+    macAddress: Joi.string(),
+    csr: Joi.string(),
+    manufacturerId: Joi.string().only(IMATRIX_MANUFACTURER_ID, OTHER_MANUFACTURER_ID)
+});
 export class AssignCert implements IAssignCert{
     public csr!: string;
     public macAddress!: string;
     public serialNumber!: string;
     public manufacturerId!: string;
 
-    private schema = Joi.object({
-        serialNumber: Joi.string(),
-        macAddress: Joi.string(),
-        csr: Joi.string(),
-        manufacturerId: Joi.string().only(IMATRIX_MANUFACTURER_ID, OTHER_MANUFACTURER_ID)
-    });
     constructor(obj: any) {
-        validatePayload(obj, this.schema);
+        validatePayload(obj, schema);
         assignProperties(obj, this);
     }
 }

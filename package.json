@@ -55,18 +55,18 @@
     "express-winston": "^4.0.4"
   },
   "jest": {
-  "testEnvironment": "node",
-  "transform": {
-    "^.+\\.tsx?$": "ts-jest"
-  },
-  "setupFiles": [
-    "<rootDir>src/test/setup-tests.ts"
-  ],
-  "testRegex": "(/(src)/(test)/.*(\\.|/)(inttest))\\.(js|ts)$",
-  "moduleFileExtensions": [
-    "js",
-    "ts",
-    "json"
-  ]
-}
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "setupFiles": [
+      "<rootDir>src/test/setup-tests.ts"
+    ],
+    "testRegex": "(/(src)/(test)/.*(\\.|/)(inttest))\\.(js|ts)$",
+    "moduleFileExtensions": [
+      "js",
+      "ts",
+      "json"
+    ]
+  }
 }

@@ -10,7 +10,8 @@ import {ErrorHandler} from "./middlewares/error-handler";
 import {transports, format} from 'winston';
 import {logger} from 'express-winston';
 import {DBProvider} from "./db/db-provider";
-import {BIND_DB_NAME, BIND_DB_NAME_TEST} from "./db/constance";
+import {BIND_DB_NAME, BIND_DB_NAME_TEST, IMATRIX_DB_NAME, IMATRIX_DB_NAME_TEST} from "./db/constance";
+import {AuthRouter} from "./auth/auth.router";
 
 export class AppHolder {
   public app: express.Express;
@@ -44,7 +45,7 @@ export class AppHolder {
     useContainer(Container);
     useExpressServer(this.app, {
       defaultErrorHandler: false,
-      controllers: [CertsRouter],
+      controllers: [CertsRouter, AuthRouter],
       middlewares: [ErrorHandler]
     });
     this.app.set('port', PORT);
@@ -53,11 +54,13 @@ export class AppHolder {
   private async setupTestEnvironment(): Promise<void> {
     await Container.get(DBProvider).runInitialTestSchemaMigration();
     Container.set('bind-db-name', BIND_DB_NAME_TEST);
+    Container.set('imatrix-db-name', IMATRIX_DB_NAME_TEST);
     console.log('TEST environment setup process completed');
   }
   private async setupDevelopmentEnvironment(): Promise<void> {
     await Container.get(DBProvider).runInitialDevelopmentSchemaMigration();
     Container.set('bind-db-name', BIND_DB_NAME);
+    Container.set('imatrix-db-name', IMATRIX_DB_NAME);
     console.log('DEVELOPMENT environment setup process completed');
   }
 }
