@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { useExpressServer, useContainer } from 'routing-controllers';
 import { Container } from 'typedi';
 import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
 
 import {PORT} from "./constants";
 import {CertsRouter} from "./certs/certs.router";
@@ -41,6 +42,7 @@ export class AppHolder {
     const router = express.Router();
     router.use(bodyParser.urlencoded({ extended: false }));
     router.use(bodyParser.json());
+    this.app.use(cors({ credentials: true, origin: true }));
     this.app.use('/', router);
     useContainer(Container);
     useExpressServer(this.app, {
