@@ -1,6 +1,6 @@
 import {Container} from "typedi";
 import {DeviceUtils} from "./device.utils";
-import {IDevice} from "../../device/device.model";
+import {IDevice} from "../../device/types/device.model";
 import {DeviceApi} from "./device-api";
 import {OTHER_MANUFACTURER_ID} from "../../certs/certs.constants";
 

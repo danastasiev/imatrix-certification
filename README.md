@@ -1,7 +1,7 @@
 
 ### Getting started:
-- ```docker build -t imatrix/cert```
-- ```docker run -p 443:443 imatrix/cert```
+- ```docker build -t imatrix/cert .```
+- ```docker run -p 443:443 -p 8443:8443 imatrix/cert```
 
 ### For running integration tests:
 - set TEST value to IMATRIX_ENVIRONMENT system variable and run the server

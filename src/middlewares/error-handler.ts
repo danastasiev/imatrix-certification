@@ -4,6 +4,7 @@ import {Middleware, ExpressErrorMiddlewareInterface, HttpError} from "routing-co
 export class ErrorHandler implements ExpressErrorMiddlewareInterface {
 
     error(error: any, request: any, response: any, next: (err: any) => any) {
+        console.log(error.stack);
         if(error instanceof HttpError) {
             response.status(error.httpCode).send({message: error.message});
         } else {

@@ -5,29 +5,25 @@ import { Container } from 'typedi';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 
-import {PORT} from "./constants";
-import {CertsRouter} from "./certs/certs.router";
 import {ErrorHandler} from "./middlewares/error-handler";
 import {transports, format} from 'winston';
 import {logger} from 'express-winston';
-import {DBProvider} from "./db/db-provider";
-import {BIND_DB_NAME, BIND_DB_NAME_TEST, IMATRIX_DB_NAME, IMATRIX_DB_NAME_TEST} from "./db/constance";
-import {AuthRouter} from "./auth/auth.router";
+import * as https from "https";
+import * as fs from "fs";
+import * as path from "path";
 
 export class AppHolder {
   public app: express.Express;
+  public port: number;
+  private routers: Function[];
 
-  constructor() {
+  constructor(port: number, routers: Function[]) {
       this.app = express();
+      this.port = port;
+      this.routers = routers;
+      this.init()
   }
-  public async init(): Promise<void> {
-    await Container.get(DBProvider).checkDbConnection();
-    if (process.env.IMATRIX_ENVIRONMENT === 'TEST') {
-      await this.setupTestEnvironment();
-    } else {
-      await this.setupDevelopmentEnvironment();
-    }
-
+  private init(): void {
     this.app.use(logger({
       transports: [
         new transports.Console()
@@ -47,22 +43,30 @@ export class AppHolder {
     useContainer(Container);
     useExpressServer(this.app, {
       defaultErrorHandler: false,
-      controllers: [CertsRouter, AuthRouter],
-      middlewares: [ErrorHandler]
+      controllers: this.routers,
+      middlewares: [ErrorHandler],
+      routePrefix: '/api'
     });
-    this.app.set('port', PORT);
+    this.app.set('port', this.port);
   }
 
-  private async setupTestEnvironment(): Promise<void> {
-    await Container.get(DBProvider).runInitialTestSchemaMigration();
-    Container.set('bind-db-name', BIND_DB_NAME_TEST);
-    Container.set('imatrix-db-name', IMATRIX_DB_NAME_TEST);
-    console.log('TEST environment setup process completed');
-  }
-  private async setupDevelopmentEnvironment(): Promise<void> {
-    await Container.get(DBProvider).runInitialDevelopmentSchemaMigration();
-    Container.set('bind-db-name', BIND_DB_NAME);
-    Container.set('imatrix-db-name', IMATRIX_DB_NAME);
-    console.log('DEVELOPMENT environment setup process completed');
+  public start(): void {
+    const certPath = path.resolve(__dirname, '../certs/server.crt');
+    const keyPath = path.resolve(__dirname, '../certs/server.key');
+    const server = https.createServer(
+        {
+          cert: fs.readFileSync(certPath, 'utf8'),
+          key: fs.readFileSync(keyPath, 'utf8')
+        },
+        this.app
+    );
+    server.listen(this.port);
+    server.on('error', (error: any) => {
+      console.log(`Start server error: ${error}`);
+      process.exit(1);
+    });
+    server.on('listening', () => {
+      console.log( `server started at https://localhost:${this.port}/` );
+    });
   }
 }

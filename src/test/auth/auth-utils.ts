@@ -1,6 +1,6 @@
 import {Container, Service} from "typedi";
 import {DBProvider} from "../../db/db-provider";
-import {IMATRIX_DB_NAME_TEST} from "../../db/constance";
+import {IMATRIX_DB_NAME_TEST} from "../../db/constants";
 import {generateUniqueName, randomString} from "../random-utils";
 import {User} from "../../users/types/user.model";
 import {AuthApi} from "./auth.api";

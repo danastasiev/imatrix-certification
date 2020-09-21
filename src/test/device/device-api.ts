@@ -1,8 +1,8 @@
-import {IDevice} from "../../device/device.model";
+import {IDevice} from "../../device/types/device.model";
 import {API_BASE_URL, AxiosUtils} from '../axios-utils';
 import { AxiosResponse } from 'axios';
 import {IMATRIX_MANUFACTURER_ID} from "../../certs/certs.constants";
-import {HEADER_TOKEN} from "../../constants";
+import {HEADER_TOKEN, INTERNAL_PORT} from "../../constants";
 
 
 export class DeviceApi {
@@ -11,7 +11,7 @@ export class DeviceApi {
         csr: string,
         manufacturerId = IMATRIX_MANUFACTURER_ID
     ): Promise<AxiosResponse> =>  {
-        const axios = AxiosUtils.createInstance(API_BASE_URL, {['Content-Type']: 'text/plain'});
+        const axios = AxiosUtils.createInstance(`${API_BASE_URL}:${INTERNAL_PORT}`, {['Content-Type']: 'text/plain'});
         const url = `/certs/sign?serialNumber=${device.sn}&macAddress=${device.mac}&manufacturerId=${manufacturerId}`;
         return axios.post(url, csr);
     };
@@ -32,6 +32,15 @@ export class DeviceApi {
     ): Promise<AxiosResponse> =>  {
         const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
         const url = `/certs/${from}/${to}`;
+        return axios.get(url);
+    };
+
+    static bind = (
+        cpuId: string,
+        productId: string,
+    ): Promise<AxiosResponse> =>  {
+        const axios = AxiosUtils.createInstance(`${API_BASE_URL}:${INTERNAL_PORT}`);
+        const url = `/device/bind?cpuId=${cpuId}&productId=${productId}`;
         return axios.get(url);
     };
 }

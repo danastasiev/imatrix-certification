@@ -1,9 +1,9 @@
 import * as Knex from 'knex';
 import * as fs from 'fs';
 import * as path from 'path';
-import {Container, Inject, Service} from "typedi";
+import {Container, Service} from "typedi";
 import {ConfigService} from "../config";
-import {BIND_DB_NAME} from "./constance";
+import {INFORMATION_SCHEMA} from "./constants";
 
 
 @Service()
@@ -41,8 +41,8 @@ export class DBProvider {
     }
 
     public async checkDbConnection(): Promise<void> {
-        const knex = await this.createDbConnection(BIND_DB_NAME);
-        await knex.raw('select * from device');
+        const knex = await this.createDbConnection(INFORMATION_SCHEMA);
+        await knex.raw('select * from TABLES');
     }
 
     // private async tablesAlreadyInitialized(
@@ -66,7 +66,7 @@ export class DBProvider {
     }
 
     private async runInitialSchemaMigration(migrationFolder: string): Promise<void> {
-        const knex = await this.createDbConnection(BIND_DB_NAME);
+        const knex = await this.createDbConnection(INFORMATION_SCHEMA);
         const schemaFiles: string[] = fs
             .readdirSync(migrationFolder)
             .filter(filename => filename.includes('.sql'));

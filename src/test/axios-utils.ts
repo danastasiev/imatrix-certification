@@ -1,8 +1,7 @@
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import * as https from 'https';
 
-export const API_BASE_URL = 'https://localhost:443';
-const DEFAULT_MINIMUM_ERROR_CODE = 400;
+export const API_BASE_URL = 'https://localhost';
 
 export interface AepRestError {
     code: string;
@@ -34,7 +33,7 @@ export class AxiosUtils {
         headers = {}
     ) => {
         const instance = axios.create({
-            baseURL: baseUrl,
+            baseURL: `${baseUrl}/api`,
             headers: {
                 ...headers
             },

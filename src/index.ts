@@ -1,30 +1,39 @@
 import {AppHolder} from "./app";
-import * as path from "path";
-import * as https from 'https';
-import * as fs from "fs";
-import {PORT} from "./constants";
+import {PORT, INTERNAL_PORT} from "./constants";
+import {Container} from "typedi";
+import {DBProvider} from "./db/db-provider";
+import {BIND_DB_NAME, BIND_DB_NAME_TEST, IMATRIX_DB_NAME, IMATRIX_DB_NAME_TEST} from "./db/constants";
+import {CertsRouter} from "./certs/certs.router";
+import {AuthRouter} from "./auth/auth.router";
+import {InternalRouter} from "./internal/internal.router";
+
+const setupTestEnvironment = async (): Promise<void> => {
+    await Container.get(DBProvider).runInitialTestSchemaMigration();
+    Container.set('bind-db-name', BIND_DB_NAME_TEST);
+    Container.set('imatrix-db-name', IMATRIX_DB_NAME_TEST);
+    console.log('TEST environment setup process completed');
+};
+
+const setupDevelopmentEnvironment = async(): Promise<void> => {
+    await Container.get(DBProvider).runInitialDevelopmentSchemaMigration();
+    Container.set('bind-db-name', BIND_DB_NAME);
+    Container.set('imatrix-db-name', IMATRIX_DB_NAME);
+    console.log('DEVELOPMENT environment setup process completed');
+};
 
 (async () => {
     try {
-        const appHolder = new AppHolder();
-        await appHolder.init();
-        const certPath = path.resolve(__dirname, '../certs/server.crt');
-        const keyPath = path.resolve(__dirname, '../certs/server.key');
-        const server = https.createServer(
-            {
-                cert: fs.readFileSync(certPath, 'utf8'),
-                key: fs.readFileSync(keyPath, 'utf8')
-            },
-            appHolder.app
-        );
-        server.listen(PORT);
-        server.on('error', (error: any) => {
-            console.log(`Start server error: ${error}`);
-            process.exit(1);
-        });
-        server.on('listening', () => {
-            console.log( `server started at https://localhost/` );
-        });
+        await Container.get(DBProvider).checkDbConnection();
+        if (process.env.IMATRIX_ENVIRONMENT === 'TEST') {
+            await setupTestEnvironment();
+        } else {
+            await setupDevelopmentEnvironment();
+        }
+        const mainApp = new AppHolder(PORT, [CertsRouter, AuthRouter]);
+        const internalApp = new AppHolder(INTERNAL_PORT, [InternalRouter]);
+        mainApp.start();
+        internalApp.start();
+
     } catch (e) {
         console.log(`Unexpected error: ${e}`);
         process.exit(1);

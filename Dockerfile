@@ -14,6 +14,7 @@ RUN npm install
 RUN npm run build
 
 EXPOSE 443
+EXPOSE 8443
 
 ENV LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
 ENV FAKETIME_NO_CACHE=1

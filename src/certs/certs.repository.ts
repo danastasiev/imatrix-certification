@@ -6,7 +6,7 @@ import {DatePeriod} from "./types/date-period.model";
 @Service()
 export class CertsRepository {
 
-    @Inject('bind-db-name')
+    @Inject('imatrix-db-name')
     private dbName!: string;
 
     constructor(
