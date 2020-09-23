@@ -11,22 +11,13 @@ export class UsersRepository {
         private readonly dbProvider: DBProvider
     ) {}
 
-    public async getUser(email: string): Promise<User | null> {
+    public async getUser(name: string): Promise<User | null> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
-        const resp = await knex.raw('select * from users where email=?;', [email]);
+        const resp = await knex.raw('select name, pass as password from users where name=?;', [name]);
         const [ rows ] = resp;
         if (rows.length) {
             return new User(rows[0]);
         }
         return null;
     }
-
-    public async saveUser(user: User): Promise<void> {
-        const knex = await this.dbProvider.createDbConnection(this.dbName);
-        const { email, password } = user;
-        await knex.raw('insert into users(email, password) values (?, ?);', [email, password]);
-    }
-
-
-
 }

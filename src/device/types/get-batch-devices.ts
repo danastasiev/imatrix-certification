@@ -2,17 +2,17 @@ import * as Joi from "joi";
 import {assignProperties, validatePayload} from "../../joi/utils";
 
 const schema = Joi.object({
-    name: Joi.string().max(60),
-    password: Joi.string().max(128)
+    batchId: Joi.string(),
+    from: Joi.number().min(0).max(5000),
+    to: Joi.number().min(0).max(5000)
 });
-
-export class User {
-    public name!: string;
-    public password!: string;
+export class GetBatchDevices {
+    public batchId!: string;
+    public from!: number;
+    public to!: number;
 
     constructor(obj: any) {
         validatePayload(obj, schema);
         assignProperties(obj, this);
     }
-
 }

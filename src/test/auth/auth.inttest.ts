@@ -12,30 +12,17 @@ describe('Basic authentication test', () => {
         await authUtils.clearUsers();
     });
     beforeEach(async () => {
-        const email = `${generateUniqueName('auth')}@test.com`;
+        const name = `${generateUniqueName('auth')}`;
         const password = generateUniqueName('auth_password');
-        user = new User({email, password});
+        user = new User({name, password});
+        await authUtils.createUser(user);
     });
     it('User can login after signup', async () => {
-        let loginResponse = await AuthApi.login(user);
-        expect(loginResponse.status).toBe(401);
-        const signupResponse = await AuthApi.signup(user);
-        expect(signupResponse.status).toBe(200);
-        const { data } = signupResponse;
-        expect(data?.token).toBeDefined();
-        loginResponse = await AuthApi.login(user);
+        const loginResponse = await AuthApi.login(user);
         expect(loginResponse.status).toBe(200);
         expect(loginResponse.data?.token).toBeDefined();
     });
-    it('User can not signup if user with same email already exists', async () => {
-        let signupResponse = await AuthApi.signup(user);
-        expect(signupResponse.status).toBe(200);
-        signupResponse = await AuthApi.signup(user);
-        expect(signupResponse.status).toBe(409);
-    });
     it('Check login with invalid credentials', async () => {
-        const signupResponse = await AuthApi.signup(user);
-        expect(signupResponse.status).toBe(200);
         const invalidUser = new User({...user, password: `${user.password}1`});
         let loginResponse = await AuthApi.login(invalidUser);
         expect(loginResponse.status).toBe(401);

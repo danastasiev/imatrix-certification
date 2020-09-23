@@ -43,4 +43,27 @@ export class DeviceApi {
         const url = `/device/bind?cpuId=${cpuId}&productId=${productId}`;
         return axios.get(url);
     };
+
+    static createBatch = (
+        authToken: string,
+        productId: string,
+        amount: number
+    ): Promise<AxiosResponse> =>  {
+        const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
+        const url = `/device/batch?productId=${productId}&amount=${amount}`;
+        return axios.post(url);
+    };
+
+    static getBatchDevices = (
+        authToken: string,
+        batchId: string,
+        pagination?: {
+            from: number;
+            to: number;
+        }
+    ): Promise<AxiosResponse> =>  {
+        const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
+        const url = `/device/batch/${batchId}${pagination ? `?from=${pagination.from}&to=${pagination.to}` : ''}`;
+        return axios.get(url);
+    };
 }

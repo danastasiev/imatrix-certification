@@ -8,10 +8,4 @@ export class AuthApi {
         const url = '/login';
         return axios.post(url, user);
     };
-
-    static signup = (user: User): Promise<AxiosResponse> => {
-        const axios = AxiosUtils.createInstance();
-        const url = '/signup';
-        return axios.post(url, user);
-    }
 }

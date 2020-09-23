@@ -1,4 +1,5 @@
 import {Container, Service} from "typedi";
+import { sha512 } from 'js-sha512';
 import {DBProvider} from "../../db/db-provider";
 import {IMATRIX_DB_NAME_TEST} from "../../db/constants";
 import {generateUniqueName, randomString} from "../random-utils";
@@ -16,13 +17,21 @@ export class AuthUtils {
         const knex = await this.db.createDbConnection(IMATRIX_DB_NAME_TEST);
         await knex.raw('DELETE from users;')
     }
+
+    public async createUser(user: User): Promise<void> {
+        const knex = await this.db.createDbConnection(IMATRIX_DB_NAME_TEST);
+        const { name, password } = user;
+        await knex.raw('insert into users(name, pass) values (?, ?);', [name, sha512(password)]);
+    }
+
     public async createAndLoginUser(basicName = randomString()): Promise<{token: string; user: User}> {
-        const email = `${generateUniqueName(basicName)}@test.com`;
+        const name = `${generateUniqueName(basicName)}`;
         const password = generateUniqueName(`${basicName}_password`);
-        const user = new User({email, password});
-        const signupResponse = await AuthApi.signup(user);
-        expect(signupResponse.status).toBe(200);
-        const {data: { token }} = signupResponse;
+        const user = new User({name, password});
+        await this.createUser(user);
+        const loginResponse = await AuthApi.login(user);
+        expect(loginResponse.status).toBe(200);
+        const {data: { token }} = loginResponse;
         return { token, user };
     }
 }

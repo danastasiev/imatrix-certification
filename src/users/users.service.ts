@@ -10,9 +10,4 @@ export class UsersService {
     public async getUser(email: string): Promise<User | null> {
         return this.usersRepository.getUser(email);
     }
-
-    public async saveUser(user: User): Promise<void> {
-        await this.usersRepository.saveUser(user);
-    }
-
 }

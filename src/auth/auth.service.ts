@@ -1,7 +1,7 @@
 import {Service} from "typedi";
 import { sign } from 'jsonwebtoken';
 
-import { sha256 } from 'js-sha256';
+import { sha512 } from 'js-sha512';
 import {SECRET} from "../constants";
 import {User} from "../users/types/user.model";
 
@@ -10,7 +10,7 @@ import {User} from "../users/types/user.model";
 export class AuthService {
     public verify(user: User, receivedPassword: string): string {
         const { password } = user;
-        const receivedHash = sha256(receivedPassword);
+        const receivedHash = sha512(receivedPassword);
         if (password === receivedHash) {
             return this.getToken(user);
         }
@@ -18,9 +18,9 @@ export class AuthService {
     }
 
     public getToken(user: User): string {
-        const { email } = user;
+        const { name } = user;
         const token =  sign({
-            data: { email}
+            data: { name}
         }, SECRET, { expiresIn: '24h' });
         return new Buffer(token).toString('base64');
     }

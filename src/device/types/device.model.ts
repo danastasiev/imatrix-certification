@@ -1,5 +1,5 @@
 export interface IDevice {
-    cpuId: string;
+    cpuId: string | null;
     productId: string;
     sn: string;
     mac: string;

@@ -6,6 +6,7 @@ import {BIND_DB_NAME, BIND_DB_NAME_TEST, IMATRIX_DB_NAME, IMATRIX_DB_NAME_TEST} 
 import {CertsRouter} from "./certs/certs.router";
 import {AuthRouter} from "./auth/auth.router";
 import {InternalRouter} from "./internal/internal.router";
+import {DeviceRouter} from "./device/device.router";
 
 const setupTestEnvironment = async (): Promise<void> => {
     await Container.get(DBProvider).runInitialTestSchemaMigration();
@@ -29,7 +30,11 @@ const setupDevelopmentEnvironment = async(): Promise<void> => {
         } else {
             await setupDevelopmentEnvironment();
         }
-        const mainApp = new AppHolder(PORT, [CertsRouter, AuthRouter]);
+        const mainApp = new AppHolder(PORT, [
+            CertsRouter,
+            AuthRouter,
+            DeviceRouter
+        ]);
         const internalApp = new AppHolder(INTERNAL_PORT, [InternalRouter]);
         mainApp.start();
         internalApp.start();
