@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import {IDevice} from "./types/device.model";
 import {IBatch} from "./types/batch.model";
 import {IBatchResponse} from "./types/batch-response";
+import {IBatchInfo} from "./types/batch-info";
+import {MAX_DEVICES_AMOUNT} from "../constants";
 
 @Service()
 export class DeviceRepository {
@@ -28,19 +30,32 @@ export class DeviceRepository {
                 [device.productId, device.sn, device.mac, device.pw]
         );
     }
-    public async getDeviceByCpuIdAndProductId(cpuId: string, productId: string): Promise<IDevice | null> {
+    public async activateDevice(cpuId: string, serialNumber: string): Promise<void> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
-        const resp = await knex.raw('select * from device where cpuid = ? AND product_id = ?;', [cpuId, productId]);
+        await knex.raw('update device set cpuid=? where sn=?', [cpuId, serialNumber]);
+    }
+    private getOptionalDevice(resp: any): IDevice | null {
         const [ [ d ] ] = resp;
         return !d ?
             null:
             {
-                cpuId,
-                productId,
+                cpuId: d.cpuid,
+                productId: d.product_id,
                 sn: d.sn,
                 mac: d.mac,
                 pw: d.pw
             };
+    }
+    public async getDeviceByCpuIdAndProductId(cpuId: string, productId: string): Promise<IDevice | null> {
+        const knex = await this.dbProvider.createDbConnection(this.dbName);
+        const resp = await knex.raw('select * from device where cpuid = ? AND product_id = ?;', [cpuId, productId]);
+        return this.getOptionalDevice(resp);
+    }
+
+    public async getDeviceBySN(sn: string): Promise<IDevice | null> {
+        const knex = await this.dbProvider.createDbConnection(this.dbName);
+        const resp = await knex.raw('select * from device where sn = ?;', [sn]);
+        return this.getOptionalDevice(resp);
     }
 
     public async getDevicesCount(): Promise<number> {
@@ -67,21 +82,28 @@ export class DeviceRepository {
         await knex('batch_device').insert(batchDevicesRelations);
     }
 
-    public async getBatchDevices(batchId: string, limit: number, offset: number): Promise<IBatchResponse> {
+    public async getDevicesFromBatch(batchId: string, limit: number = MAX_DEVICES_AMOUNT, offset: number = 0): Promise<IDevice[]> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
         let sql = `select device.* from device
                         inner join batch_device on device.sn = batch_device.sn
                         inner join batch on batch_device.batch_id = batch.batch_id
                      where batch.batch_id = ? limit ? offset ?;`;
         const [ rows ] = await knex.raw(sql, [batchId, limit, offset]);
-        const devices = rows.map((device:any) => ({
+        return rows.map((device:any) => ({
             cpuId: device.cpuid,
             productId: device.product_id,
             sn: device.sn,
             mac: device.mac,
             pw: device.pw
         }));
-        sql = `select count(*) total from device
+    }
+
+    public async getBatchDevices(batchId: string, limit: number, offset: number): Promise<IBatchResponse> {
+        const knex = await this.dbProvider.createDbConnection(this.dbName);
+
+        const devices = await this.getDevicesFromBatch(batchId, limit, offset);
+
+        const sql = `select count(*) total from device
                         inner join batch_device on device.sn = batch_device.sn
                         inner join batch on batch_device.batch_id = batch.batch_id
                      where batch.batch_id = ?`;
@@ -94,5 +116,22 @@ export class DeviceRepository {
         const [ rows ] = await knex.raw('select * from batch where batch_id=?;', [id]);
 
         return rows.length === 0 ? null : { id, productId: rows[0].batch_id, created: new Date(rows[0].created) };
+    }
+
+    public async getBatchesInfo(productId: string): Promise<IBatchInfo[]> {
+        const knex = await this.dbProvider.createDbConnection(this.dbName);
+        const sql = `select batch.*, count(bd.sn) registered, sum(if(d.cpuid is null, 0, 1)) activated from batch
+                        inner join batch_device bd on batch.batch_id = bd.batch_id
+                        inner join device d on d.sn = bd.sn
+                    where batch.product_id=?
+                    group by bd.batch_id;`;
+        const [ rows ] = await knex.raw(sql, [productId]);
+        return rows.map((r: any) => ({
+            productId,
+            id: r.batch_id,
+            created: new Date(r.created),
+            registered: r.registered,
+            activated: r.activated
+        }));
     }
 }

@@ -1,14 +1,13 @@
 import * as Joi from "joi";
 import {assignProperties, validatePayload} from "../../joi/utils";
-import {MAX_DEVICES_AMOUNT} from "../../constants";
 
 const schema = Joi.object({
-    productId: Joi.string(),
-    amount: Joi.number().min(1).max(MAX_DEVICES_AMOUNT)
+    cpuId: Joi.string(),
+    sn: Joi.string()
 });
-export class CreateBatch {
-    public productId!: string;
-    public amount!: number;
+export class ActivatePayload {
+    public cpuId!: string;
+    public sn!: string;
 
     constructor(obj: any) {
         validatePayload(obj, schema);

@@ -1,10 +1,7 @@
-import {Body, Controller, Get, HttpError, Param, Post, QueryParam, UseBefore} from "routing-controllers";
-import {CertsService} from "../certs/certs.service";
+import {Controller, Get, HttpError, Param, Post, QueryParam, UseBefore, Res, ContentType} from "routing-controllers";
+import * as Joi from "joi";
+import { Response } from 'express';
 import {DeviceService} from "./device.service";
-import {AssignCert} from "../certs/types/assign-cert.model";
-import {OTHER_MANUFACTURER_ID} from "../certs/certs.constants";
-import {IBindResponse} from "./types/bind-response";
-import {BindPayload} from "./types/bind-payload";
 import {IBatch} from "./types/batch.model";
 import {jwtVerificationMiddleware} from "../middlewares/jwt.middlware";
 import {CreateBatch} from "./types/create-batch";
@@ -12,6 +9,8 @@ import {ProductService} from "../product/product.service";
 import {IBatchResponse} from "./types/batch-response";
 import {DEFAULT_LIMIT, DEFAULT_OFFSET} from "../constants";
 import {GetBatchDevices} from "./types/get-batch-devices";
+import {IBatchInfo} from "./types/batch-info";
+import {validatePayload} from "../joi/utils";
 
 @Controller('/device')
 export class DeviceRouter {
@@ -47,5 +46,38 @@ export class DeviceRouter {
 
        }
        return this.deviceService.getBatchDevices(payload);
+    }
+
+    @Get('/batch/all/:productId')
+    @UseBefore(jwtVerificationMiddleware)
+    public async getBatchesInfo(
+        @Param('productId') productId: string,
+    ): Promise<IBatchInfo[]> {
+        validatePayload(
+        { productId },
+            Joi.object({ productId: Joi.string() })
+        );
+        return this.deviceService.getBatchesInfo(productId);
+    }
+
+    @Get('/batch/download/:batchId')
+    @UseBefore(jwtVerificationMiddleware)
+    @ContentType('application/octet-stream')
+    public async downloadBatch(
+        @Param('batchId') batchId: string,
+        @Res() res: Response
+    ): Promise<any> {
+        validatePayload(
+            { batchId },
+            Joi.object({ batchId: Joi.string() })
+        );
+        const batch = await this.deviceService.getBatch(batchId);
+        if (batch === null) {
+            throw new HttpError(409, `Batch does not exist, id=${batchId}`);
+
+        }
+        const batchCsv = await this.deviceService.getBatchCsv(batchId);
+        res.set('Content-Disposition', `attachment;filename="batch-${batchId}.csv"`);
+        return res.send(batchCsv);
     }
 }

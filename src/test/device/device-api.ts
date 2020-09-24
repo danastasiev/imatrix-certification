@@ -44,6 +44,15 @@ export class DeviceApi {
         return axios.get(url);
     };
 
+    static activate = (
+        cpuId: string,
+        sn: string,
+    ): Promise<AxiosResponse> =>  {
+        const axios = AxiosUtils.createInstance(`${API_BASE_URL}:${INTERNAL_PORT}`);
+        const url = `/device/bind?cpuId=${cpuId}&sn=${sn}`;
+        return axios.post(url);
+    };
+
     static createBatch = (
         authToken: string,
         productId: string,
@@ -64,6 +73,22 @@ export class DeviceApi {
     ): Promise<AxiosResponse> =>  {
         const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
         const url = `/device/batch/${batchId}${pagination ? `?from=${pagination.from}&to=${pagination.to}` : ''}`;
+        return axios.get(url);
+    };
+    static getAllBatched = (
+        authToken: string,
+        productId: string
+    ): Promise<AxiosResponse> =>  {
+        const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
+        const url = `/device/batch/all/${productId}`;
+        return axios.get(url);
+    };
+    static downloadBatch = (
+        authToken: string,
+        batchId: string
+    ): Promise<AxiosResponse> =>  {
+        const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
+        const url = `/device/batch/download/${batchId}`;
         return axios.get(url);
     };
 }

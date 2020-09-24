@@ -5,3 +5,4 @@ export const SECRET = 'superImatrixs3cr3t';
 export const HEADER_TOKEN = 'x-auth-token';
 export const DEFAULT_LIMIT = 50;
 export const DEFAULT_OFFSET = 0;
+export const MAX_DEVICES_AMOUNT = 5000;

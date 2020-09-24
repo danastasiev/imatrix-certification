@@ -6,6 +6,9 @@ import {CreateBatch} from "./types/create-batch";
 import {IBatch} from "./types/batch.model";
 import {IBatchResponse} from "./types/batch-response";
 import {GetBatchDevices} from "./types/get-batch-devices";
+import {IBatchInfo} from "./types/batch-info";
+import {Parser} from 'json2csv';
+import {IDevice} from "./types/device.model";
 
 @Service()
 export class DeviceService {
@@ -100,5 +103,22 @@ export class DeviceService {
 
     public async getBatch(id: string): Promise<IBatch | null> {
         return this.deviceRepository.getBatch(id);
+    }
+
+    public async getBatchesInfo(productId: string): Promise<IBatchInfo[]> {
+        return this.deviceRepository.getBatchesInfo(productId);
+    }
+
+    public async getBatchCsv(batchId: string): Promise<string> {
+        const batchDevices = await this.deviceRepository.getDevicesFromBatch(batchId);
+        const dataForCsv = batchDevices.map(d => ({ ['Serial Number']: d.sn, ['Mac Address']: d.mac}));
+        const json2csvParser = new Parser();
+        return json2csvParser.parse(dataForCsv);
+    }
+    public async activateDevice(cpuId: string, serialNumber: string): Promise<void> {
+        await this.deviceRepository.activateDevice(cpuId, serialNumber);
+    }
+    public async getDeviceBySN(sn: string): Promise<IDevice | null> {
+        return this.deviceRepository.getDeviceBySN(sn);
     }
 }
