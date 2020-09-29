@@ -26,6 +26,7 @@ R6iQHd0zfQf1nNK6dTLQfz/q4FA/3MveRqRu4Savqalxz7oRdg0M
 
 const deviceUtils = Container.get(DeviceUtils);
 const authUtils = Container.get(AuthUtils);
+const TIME_DIFFERENCE = 100000;
 let authToken: string;
 let device: IDevice;
 
@@ -59,7 +60,7 @@ describe('Getting cert logs test', () => {
 
     it('Getting logs by time period test', async () => {
         const from = new Date().getTime();
-        const to = from + 40000;
+        const to = from + TIME_DIFFERENCE;
         const resp = await DeviceApi.getLogsByTimePeriod(authToken, from, to);
         expect(resp.status).toBe(200);
         expect(resp.data).toHaveLength(2);
@@ -76,7 +77,7 @@ describe('Getting cert logs test', () => {
 
     it('TO parameter must be bigger than FROM', async () => {
         const from = new Date().getTime();
-        const to = from + 40000;
+        const to = from + TIME_DIFFERENCE;
         const resp = await DeviceApi.getLogsByTimePeriod(authToken, to, from);
         expect(resp.status).toBe(400);
     });
@@ -94,7 +95,7 @@ describe('Getting cert logs test', () => {
         const successResp = await DeviceApi.signCert(newDevice, testCsr);
         expect(successResp.status).toBe(200);
         const from = new Date().getTime();
-        const to = from + 40000;
+        const to = from + TIME_DIFFERENCE;
         const resp = await DeviceApi.getLogsByTimePeriod(authToken, from, to);
         expect(resp.status).toBe(200);
         expect(resp.data).toHaveLength(3);
