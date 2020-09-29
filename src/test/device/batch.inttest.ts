@@ -5,6 +5,7 @@ import {IProduct} from "../../product/types/product.model";
 import {DeviceApi} from "./device-api";
 import {IBatchInfo} from "../../device/types/batch-info";
 import {randomString} from "../random-utils";
+import {BatchType} from "../../device/types/batch-type";
 
 const deviceUtils = Container.get(DeviceUtils);
 const authUtils = Container.get(AuthUtils);
@@ -55,6 +56,8 @@ describe('Device batches test', () => {
             expect(batch.created).toBeDefined();
             expect(batch.activated).toBeDefined();
             expect(batch.registered).toBeDefined();
+            expect(batch.type).toBeDefined();
+            expect(batch.description).toBeDefined();
         });
         data.sort(
             (b1: IBatchInfo, b2: IBatchInfo) => new Date(b1.created).getTime() - new Date(b2.created).getTime()
@@ -83,6 +86,27 @@ describe('Device batches test', () => {
     it('Create batch for non existence product', async () => {
         const response = await DeviceApi.createBatch(authToken, 'nonexistenceId', 20);
         expect(response.status).toBe(409);
+    });
+
+    it('Create batch with WIFI type', async () => {
+        const response = await DeviceApi.createBatch(authToken, product.id, 1, BatchType.WIFI);
+        expect(response.status).toBe(200);
+        expect(response.data).toBeDefined();
+        expect(response.data.type).toBe(BatchType.WIFI);
+    });
+
+    it('Create batch with description', async () => {
+        const description = 'test description';
+        const response = await DeviceApi.createBatch(
+            authToken,
+            product.id,
+            1,
+            BatchType.WIFI,
+            description
+        );
+        expect(response.status).toBe(200);
+        expect(response.data).toBeDefined();
+        expect(response.data.description).toBe(description);
     });
 
     it('Get batch devices for non existence batch id', async () => {

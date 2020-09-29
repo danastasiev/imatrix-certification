@@ -72,7 +72,7 @@ export class DeviceService {
     }
 
     public async createNewBatch(createBatch: CreateBatch): Promise<IBatch> {
-        const batch = await this.deviceRepository.createBatch(createBatch.productId);
+        const batch = await this.deviceRepository.createBatch(createBatch);
         const devicesNumber = await this.deviceRepository.getDevicesCount();
         const batchDevicesRelations = [];
         const batchDevicesForDb = [];

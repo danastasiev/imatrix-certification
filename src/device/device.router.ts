@@ -1,6 +1,17 @@
-import {Controller, Get, HttpError, Param, Post, QueryParam, UseBefore, Res, ContentType} from "routing-controllers";
+import {
+    BodyParam,
+    ContentType,
+    Controller,
+    Get,
+    HttpError,
+    Param,
+    Post,
+    QueryParam,
+    Res,
+    UseBefore
+} from "routing-controllers";
 import * as Joi from "joi";
-import { Response } from 'express';
+import {Response} from 'express';
 import {DeviceService} from "./device.service";
 import {IBatch} from "./types/batch.model";
 import {jwtVerificationMiddleware} from "../middlewares/jwt.middlware";
@@ -11,6 +22,7 @@ import {DEFAULT_LIMIT, DEFAULT_OFFSET} from "../constants";
 import {GetBatchDevices} from "./types/get-batch-devices";
 import {IBatchInfo} from "./types/batch-info";
 import {validatePayload} from "../joi/utils";
+import {BatchType} from "./types/batch-type";
 
 @Controller('/device')
 export class DeviceRouter {
@@ -23,9 +35,11 @@ export class DeviceRouter {
     @UseBefore(jwtVerificationMiddleware)
     public async sign(
         @QueryParam('productId') productId: string,
-        @QueryParam('amount') amount: number
+        @QueryParam('amount') amount: number,
+        @QueryParam('type', { required: false }) type: BatchType = BatchType.WIFI,
+        @BodyParam('description', { required: false }) description?: string
     ): Promise<IBatch>{
-       const payload = new CreateBatch({ productId, amount });
+       const payload = new CreateBatch({ productId, amount, type, description });
        const product = await this.productService.getProduct(payload.productId);
        if (product === null) {
            throw new HttpError(409, `Product does not exist, id=${payload.productId}`);

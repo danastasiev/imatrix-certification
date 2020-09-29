@@ -6,6 +6,7 @@ import {IBatch} from "./types/batch.model";
 import {IBatchResponse} from "./types/batch-response";
 import {IBatchInfo} from "./types/batch-info";
 import {MAX_DEVICES_AMOUNT} from "../constants";
+import {CreateBatch} from "./types/create-batch";
 
 @Service()
 export class DeviceRepository {
@@ -65,12 +66,20 @@ export class DeviceRepository {
     }
 
 
-    public async createBatch(productId: string): Promise<IBatch> {
+    public async createBatch(createBatchPayload: CreateBatch): Promise<IBatch> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
+        const {productId, type, description} = createBatchPayload;
         const id = uuidv4();
-        await knex.raw('insert into batch (batch_id, product_id) values (?, ?)', [id, productId]);
+        await knex.raw('insert into batch (batch_id, product_id, batch_type, description) values (?, ?, ?, ?)',
+            [id, productId, type, description || '']);
         const [ [ batch ] ] = await knex.raw('select * from batch where batch_id=?', [id]);
-        return { id, productId, created: new Date(batch.created) };
+        return {
+            id,
+            productId,
+            type,
+            created: new Date(batch.created),
+            description: batch.description
+        };
     }
 
     public async createBatchOfDevices(
@@ -115,7 +124,15 @@ export class DeviceRepository {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
         const [ rows ] = await knex.raw('select * from batch where batch_id=?;', [id]);
 
-        return rows.length === 0 ? null : { id, productId: rows[0].batch_id, created: new Date(rows[0].created) };
+        return rows.length === 0 ?
+            null :
+            {
+                id,
+                productId: rows[0].product_id,
+                created: new Date(rows[0].created),
+                type: rows[0].batch_type,
+                description: rows[0].description
+            };
     }
 
     public async getBatchesInfo(productId: string): Promise<IBatchInfo[]> {
@@ -129,6 +146,8 @@ export class DeviceRepository {
         return rows.map((r: any) => ({
             productId,
             id: r.batch_id,
+            type: r.batch_type,
+            description: r.description,
             created: new Date(r.created),
             registered: r.registered,
             activated: r.activated

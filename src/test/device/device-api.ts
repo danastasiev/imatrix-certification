@@ -3,6 +3,7 @@ import {API_BASE_URL, AxiosUtils} from '../axios-utils';
 import { AxiosResponse } from 'axios';
 import {IMATRIX_MANUFACTURER_ID} from "../../certs/certs.constants";
 import {HEADER_TOKEN, INTERNAL_PORT} from "../../constants";
+import {BatchType} from "../../device/types/batch-type";
 
 
 export class DeviceApi {
@@ -56,11 +57,13 @@ export class DeviceApi {
     static createBatch = (
         authToken: string,
         productId: string,
-        amount: number
+        amount: number,
+        type?: BatchType,
+        description?: string
     ): Promise<AxiosResponse> =>  {
         const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
-        const url = `/device/batch?productId=${productId}&amount=${amount}`;
-        return axios.post(url);
+        const url = `/device/batch?productId=${productId}&amount=${amount}${type ? `&type=${type}` : ''}`;
+        return description ? axios.post(url, { description} ) : axios.post(url);
     };
 
     static getBatchDevices = (

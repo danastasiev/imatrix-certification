@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS certs_log (
 CREATE TABLE IF NOT EXISTS batch (
   batch_id varchar(50) NOT NULL,
   product_id varchar(50) NOT NULL,
+  batch_type varchar(10) NOT NULL,
+  description varchar(80),
   created DATETIME DEFAULT NOW(),
   PRIMARY KEY (batch_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
