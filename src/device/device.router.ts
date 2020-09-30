@@ -3,7 +3,7 @@ import {
     ContentType,
     Controller,
     Get,
-    HttpError,
+    HttpError, OnUndefined,
     Param,
     Post,
     QueryParam,
@@ -23,6 +23,7 @@ import {GetBatchDevices} from "./types/get-batch-devices";
 import {IBatchInfo} from "./types/batch-info";
 import {validatePayload} from "../joi/utils";
 import {BatchType} from "./types/batch-type";
+import {CheckMacPayload} from "./types/check-mac-payload";
 
 @Controller('/device')
 export class DeviceRouter {
@@ -37,12 +38,16 @@ export class DeviceRouter {
         @QueryParam('productId') productId: string,
         @QueryParam('amount') amount: number,
         @QueryParam('type', { required: false }) type: BatchType = BatchType.WIFI,
-        @BodyParam('description', { required: false }) description?: string
+        @BodyParam('description', { required: false }) description?: string,
+        @BodyParam('firstMac', { required: false }) firstMac?: string
     ): Promise<IBatch>{
-       const payload = new CreateBatch({ productId, amount, type, description });
+       const payload = new CreateBatch({ productId, amount, type, description, firstMac });
        const product = await this.productService.getProduct(payload.productId);
        if (product === null) {
            throw new HttpError(409, `Product does not exist, id=${payload.productId}`);
+       }
+       if (payload.firstMac) {
+           await this.deviceService.checkMacSequence(payload.firstMac, payload.amount);
        }
        return this.deviceService.createNewBatch(payload);
     }
@@ -94,4 +99,16 @@ export class DeviceRouter {
         res.set('Content-Disposition', `attachment;filename="batch-${batchId}.csv"`);
         return res.send(batchCsv);
     }
+
+    @Get('/mac/available')
+    @UseBefore(jwtVerificationMiddleware)
+    @OnUndefined(200)
+    public async checkMacSequence(
+        @QueryParam('mac') mac: string,
+        @QueryParam('amount') amount: number
+    ): Promise<void> {
+        const payload = new CheckMacPayload({ mac, amount });
+        await this.deviceService.checkMacSequence(payload.mac, payload.amount);
+    }
+
 }

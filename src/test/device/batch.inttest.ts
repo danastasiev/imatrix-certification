@@ -6,12 +6,13 @@ import {DeviceApi} from "./device-api";
 import {IBatchInfo} from "../../device/types/batch-info";
 import {randomString} from "../random-utils";
 import {BatchType} from "../../device/types/batch-type";
+import {IDevice} from "../../device/types/device.model";
 
 const deviceUtils = Container.get(DeviceUtils);
 const authUtils = Container.get(AuthUtils);
 let authToken: string;
 let product: IProduct;
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 describe('Device batches test', () => {
     afterEach(async () => {
         await authUtils.clearUsers();
@@ -48,7 +49,7 @@ describe('Device batches test', () => {
         expect(createBatchResponse.status).toBe(200);
         createBatchResponse = await DeviceApi.createBatch(authToken, product.id, 5);
         expect(createBatchResponse.status).toBe(200);
-        const getBatchesResponse = await DeviceApi.getAllBatched(authToken, product.id);
+        const getBatchesResponse = await DeviceApi.getAllBatches(authToken, product.id);
         expect(getBatchesResponse.status).toBe(200);
         const { data } = getBatchesResponse;
         expect(data).toHaveLength(2);
@@ -102,7 +103,7 @@ describe('Device batches test', () => {
             product.id,
             1,
             BatchType.WIFI,
-            description
+            { description }
         );
         expect(response.status).toBe(200);
         expect(response.data).toBeDefined();
@@ -115,7 +116,7 @@ describe('Device batches test', () => {
     });
 
     it('Get batches for non existence product test', async () => {
-        const getBatchesResponse = await DeviceApi.getAllBatched(authToken, 'nonexistenceId');
+        const getBatchesResponse = await DeviceApi.getAllBatches(authToken, 'nonexistenceId');
         expect(getBatchesResponse.status).toBe(200);
         expect(getBatchesResponse.data).toHaveLength(0);
     });
@@ -132,7 +133,6 @@ describe('Device batches test', () => {
         expect(csvBodyArray).toHaveLength(22);
         expect(csvBodyArray[0]).toBe(`"Serial Number"`);
         expect(csvBodyArray[1]).toBe(`"Mac Address"`);
-        expect(csvBodyArray[2]).toBe(`"0000000000"`);
     });
 
     it('Download non existence batch test', async () => {
@@ -150,7 +150,7 @@ describe('Device batches test', () => {
         expect(getData?.devices).toHaveLength(2);
         expect(getData?.total).toBe(2);
         const { devices } = getData;
-        let getBatchesResponse = await DeviceApi.getAllBatched(authToken, product.id);
+        let getBatchesResponse = await DeviceApi.getAllBatches(authToken, product.id);
         expect(getBatchesResponse.status).toBe(200);
         let { data: batches } = getBatchesResponse;
         expect(batches).toHaveLength(1);
@@ -160,7 +160,7 @@ describe('Device batches test', () => {
             const response = await DeviceApi.activate(randomString(), device.sn);
             expect(response.status).toBe(200);
         }
-        getBatchesResponse = await DeviceApi.getAllBatched(authToken, product.id);
+        getBatchesResponse = await DeviceApi.getAllBatches(authToken, product.id);
         ({ data: batches } = getBatchesResponse);
         expect(batches[0].activated).toBe(2);
     });
@@ -182,4 +182,77 @@ describe('Device batches test', () => {
         const activateResponse = await DeviceApi.activate(randomString(), 'nonexistenceId');
         expect(activateResponse.status).toBe(409);
     });
+    it('Check mac sequence', async () => {
+        const response = await DeviceApi.createBatch(authToken, product.id, 10);
+        expect(response.status).toBe(200);
+        let checkResponse = await DeviceApi.checkMacSequence(
+            authToken,
+            '00:06:8b:01:00:10',
+            10
+        );
+        expect(checkResponse.status).toBe(200);
+        checkResponse = await DeviceApi.checkMacSequence(
+            authToken,
+            '00:06:8b:01:00:02',
+            2
+        );
+        expect(checkResponse.status).toBe(409);
+        checkResponse = await DeviceApi.checkMacSequence(
+            authToken,
+            '00:06:8b:01:00:0a',
+            2
+        );
+        expect(checkResponse.status).toBe(409);
+    });
+    it('Create BLE batch', async () => {
+        const response = await DeviceApi.createBatch(
+            authToken,
+            product.id,
+            10,
+            BatchType.BLE,
+            { firstMac: '00:06:8b:01:00:0a' }
+        );
+        expect(response.status).toBe(200);
+        const { data } = response;
+        expect(data.type).toBeDefined();
+        expect(data.type).toBe(BatchType.BLE);
+        const devicesResponse = await DeviceApi.getBatchDevices(authToken, data.id);
+        expect(devicesResponse.status).toBe(200);
+        const { data: { devices } } = devicesResponse;
+        expect(devices).toHaveLength(10);
+        devices.sort(
+            (d1: IDevice, d2: IDevice) => d1.mac.localeCompare(d2.mac)
+        );
+        expect(devices[0].mac).toBe('00:06:8b:01:00:0a');
+        expect(devices[1].mac).toBe('00:06:8b:01:00:0b');
+    });
+
+    it('Create BLE batch without first mac', async () => {
+        const response = await DeviceApi.createBatch(
+            authToken,
+            product.id,
+            10,
+            BatchType.BLE
+        );
+        expect(response.status).toBe(400);
+    });
+
+    it('Create BLE batch with existence first mac', async () => {
+        const wifiResponse = await DeviceApi.createBatch(
+            authToken,
+            product.id,
+            10
+        );
+        expect(wifiResponse.status).toBe(200);
+
+        const bleResponse = await DeviceApi.createBatch(
+            authToken,
+            product.id,
+            10,
+            BatchType.BLE,
+            { firstMac: '00:06:8b:01:00:01' }
+        );
+        expect(bleResponse.status).toBe(409);
+    });
+
 });

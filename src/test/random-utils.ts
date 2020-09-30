@@ -26,3 +26,8 @@ export function randomIntFromInterval(min: number, max: number): string {
 export function generateNumber(): string {
     return randomIntFromInterval(10000000, 999999999);
 }
+
+export function generateSn(): string{
+    const nonZeroFilled = String(Math.floor(Math.random() * 10000000000));
+    return nonZeroFilled.padStart(10, '0');
+}

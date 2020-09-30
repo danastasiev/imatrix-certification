@@ -9,6 +9,7 @@ import {GetBatchDevices} from "./types/get-batch-devices";
 import {IBatchInfo} from "./types/batch-info";
 import {Parser} from 'json2csv';
 import {IDevice} from "./types/device.model";
+import {generateSn} from "../test/random-utils";
 
 @Service()
 export class DeviceService {
@@ -25,12 +26,33 @@ export class DeviceService {
         return this.deviceRepository.doesDeviceExist(sn, mac);
     }
 
-    private getNewDeviceInfo(devicesNumber: number): { serialNumber: string; radiusPassword:string; mac: string | undefined } {
-        const serialNumber = devicesNumber.toString().padStart(10, '0');
-        const radiusPassword = this.generateRadiusPassword();
-        const macNumber = this.MAC_START + devicesNumber + 1;
-        const mac = ("000000000000" + macNumber.toString(16))
+    private getMACFromNumber(macNumber: number): string | undefined {
+        return ("000000000000" + macNumber.toString(16))
             .substr(-12).match( /.{1,2}/g )?.join( ':' );
+    }
+
+    private getNumberFromMac(mac: string): number {
+        return parseInt(mac.replace(/:/g, ''), 16);
+    }
+
+    private async getNewSN(): Promise<string> {
+        const sn = generateSn();
+        const device = await this.getDeviceBySN(sn);
+        if (device !== null) {
+            return this.getNewSN();
+        }
+        return sn;
+    }
+
+    private async getNewDeviceInfo(
+        devicesNumber: number,
+        predefinedMac?: number):
+        Promise<{ serialNumber: string; radiusPassword:string; mac: string | undefined }>
+    {
+        const serialNumber = await this.getNewSN();
+        const radiusPassword = this.generateRadiusPassword();
+        const macNumber = predefinedMac || this.MAC_START + devicesNumber + 1;
+        const mac = this.getMACFromNumber(macNumber);
         return { serialNumber, radiusPassword,  mac};
     }
 
@@ -44,7 +66,7 @@ export class DeviceService {
             }
         }
         const devicesNumber = await this.deviceRepository.getDevicesCount();
-        const { serialNumber, radiusPassword, mac} = this.getNewDeviceInfo(devicesNumber);
+        const { serialNumber, radiusPassword, mac} = await this.getNewDeviceInfo(devicesNumber);
         if (!mac) {
             throw new HttpError(409, 'Creation mac error');
         }
@@ -76,8 +98,12 @@ export class DeviceService {
         const devicesNumber = await this.deviceRepository.getDevicesCount();
         const batchDevicesRelations = [];
         const batchDevicesForDb = [];
+        const definedFirstMac = createBatch.firstMac && this.getNumberFromMac(createBatch.firstMac);
         for (let i = 0; i< createBatch.amount; i++) {
-            const deviceInfo = this.getNewDeviceInfo(devicesNumber + i);
+            const deviceInfo = await this.getNewDeviceInfo(
+                devicesNumber + i,
+                definedFirstMac ? definedFirstMac + i : undefined
+            );
             if (!deviceInfo.mac) {
                 throw new HttpError(409, 'Creation mac error');
             }
@@ -120,5 +146,14 @@ export class DeviceService {
     }
     public async getDeviceBySN(sn: string): Promise<IDevice | null> {
         return this.deviceRepository.getDeviceBySN(sn);
+    }
+
+    public async checkMacSequence(mac: string, amount: number): Promise<void> {
+        const lastMacNumber = this.getNumberFromMac(mac) + amount;
+        const lastMac = this.getMACFromNumber(lastMacNumber);
+        const isMacSequenceAvailable = await this.deviceRepository.isMacSequenceAvailable(mac, lastMac!);
+        if (!isMacSequenceAvailable) {
+            throw new HttpError(409, 'MAC addresses are not available');
+        }
     }
 }

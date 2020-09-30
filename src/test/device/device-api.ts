@@ -59,11 +59,11 @@ export class DeviceApi {
         productId: string,
         amount: number,
         type?: BatchType,
-        description?: string
+        body?: {description?: string; firstMac?: string}
     ): Promise<AxiosResponse> =>  {
         const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
         const url = `/device/batch?productId=${productId}&amount=${amount}${type ? `&type=${type}` : ''}`;
-        return description ? axios.post(url, { description} ) : axios.post(url);
+        return body ? axios.post(url, body ) : axios.post(url);
     };
 
     static getBatchDevices = (
@@ -78,7 +78,7 @@ export class DeviceApi {
         const url = `/device/batch/${batchId}${pagination ? `?from=${pagination.from}&to=${pagination.to}` : ''}`;
         return axios.get(url);
     };
-    static getAllBatched = (
+    static getAllBatches = (
         authToken: string,
         productId: string
     ): Promise<AxiosResponse> =>  {
@@ -92,6 +92,15 @@ export class DeviceApi {
     ): Promise<AxiosResponse> =>  {
         const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
         const url = `/device/batch/download/${batchId}`;
+        return axios.get(url);
+    };
+    static checkMacSequence = (
+        authToken: string,
+        mac: string,
+        amount: number
+    ): Promise<AxiosResponse> =>  {
+        const axios = AxiosUtils.createInstance(API_BASE_URL, {[HEADER_TOKEN]: authToken});
+        const url = `/device/mac/available?mac=${mac}&amount=${amount}`;
         return axios.get(url);
     };
 }

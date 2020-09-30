@@ -153,4 +153,11 @@ export class DeviceRepository {
             activated: r.activated
         }));
     }
+
+    public async isMacSequenceAvailable(mac: string, lastMac: string): Promise<boolean> {
+        const knex = await this.dbProvider.createDbConnection(this.dbName);
+        const sql = 'select * from device where mac >= ? and mac <= ?';
+        const [ rows ] = await knex.raw(sql, [mac, lastMac]);
+        return rows.length === 0;
+    }
 }

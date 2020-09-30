@@ -1,4 +1,5 @@
-import { Schema } from 'joi';
+import {Schema} from 'joi';
+import * as Joi from 'joi';
 import {HttpError} from "routing-controllers";
 export const validatePayload = (obj: object, schema: Schema) => {
     const result = schema.validate(obj, {
@@ -20,3 +21,4 @@ export const assignProperties = <T extends Object>(obj: any, self: T): void => {
         }
     });
 };
+export const macAddressSchema = Joi.string().regex(/^([0-9a-fA-F]{2}[:]?){5}([0-9a-fA-F]{2})$/);
