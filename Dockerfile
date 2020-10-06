@@ -5,13 +5,25 @@ RUN git clone https://github.com/wolfcw/libfaketime.git
 WORKDIR /libfaketime/src
 RUN make install
 
-WORKDIR .
+WORKDIR /imatrix
 
 COPY . .
+
+WORKDIR /imatrix/backend
 
 RUN npm install
 
 RUN npm run build
+
+WORKDIR /imatrix/frontend
+
+RUN npm install
+
+RUN npm run build
+
+RUN cp -R ./build ../backend/build/front
+
+WORKDIR /imatrix/backend
 
 EXPOSE 443
 EXPOSE 8443
