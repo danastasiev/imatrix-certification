@@ -17,31 +17,17 @@
     "date-fns": "2.0.0-alpha.27",
     "react-router-dom": "^4.2.2",
     "react-router-redux": "~5.0.0-alpha.9",
-    "eslint": "4.4.1",
-    "eslint-plugin-react": "^7.5.1",
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.0.0-beta.0",
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
-    "webpack": "3.5.1",
     "webpack-dev-server": "3.10.2",
-    "react-scripts": "3.4.0",
-    "extract-text-webpack-plugin": "^3.0.0",
-    "sw-precache-webpack-plugin": "0.11.4",
-    "react-dev-utils": "^3.1.0",
-    "babel-loader": "7.1.1",
-    "html-webpack-plugin": "2.29.0",
-    "webpack-manifest-plugin": "1.2.1",
-    "eslint-loader": "1.9.0",
-    "url-loader": "0.5.9",
-    "css-loader": "0.28.4",
-    "file-loader": "0.11.2",
-    "babel-eslint": "7.2.3"
+    "react-scripts": "3.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "node --stack_size=100000 scripts/build.js"
+    "build": "react-scripts build"
   },
   "devDependencies": {
     "prop-types": "^15.5.10",
