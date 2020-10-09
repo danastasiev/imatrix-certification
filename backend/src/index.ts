@@ -7,7 +7,7 @@ import {CertsRouter} from "./certs/certs.router";
 import {AuthRouter} from "./auth/auth.router";
 import {InternalRouter} from "./internal/internal.router";
 import {DeviceRouter} from "./device/device.router";
-import {ProductRouter} from "./product/types/product.router";
+import {ProductRouter} from "./product/product.router";
 
 const setupTestEnvironment = async (): Promise<void> => {
     await Container.get(DBProvider).runInitialTestSchemaMigration();

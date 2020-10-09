@@ -1,7 +1,7 @@
 import {Controller, Get, UseBefore} from "routing-controllers";
-import {ProductService} from "../product.service";
-import {jwtVerificationMiddleware} from "../../middlewares/jwt.middlware";
-import {IProduct} from "./product.model";
+import {ProductService} from "./product.service";
+import {jwtVerificationMiddleware} from "../middlewares/jwt.middlware";
+import {IProduct} from "./types/product.model";
 
 @Controller('/product')
 export class ProductRouter {
