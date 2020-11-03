@@ -22,11 +22,10 @@ const App = ({auth}) => {
         {
           token ? (
             <Switch>
-              <Route exact component = { Products } path = '/products' />
               <Route exact component = { Batches } path = '/product/:productId' />
               <Route exact component = { Batch } path = '/batch/:batchId' />
               <Route exact component = { Products } path = '/products' />
-              <Redirect exact push to = '/products' />
+              <Redirect exact push to = '/product/0x3ab5d042' />
             </Switch>
           ) : (
 
