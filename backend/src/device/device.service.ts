@@ -100,11 +100,14 @@ export class DeviceService {
         const batchDevicesForDb = [];
         const definedFirstMac = createBatch.firstMac && this.getNumberFromMac(createBatch.firstMac);
         const allSn = await this.deviceRepository.getAllSN();
-        for (let i = 0; i< createBatch.amount; i++) {
+        for (let i = 0; i < createBatch.amount; i++) {
+            const predefinedMac = createBatch.macs ?
+                this.getNumberFromMac(createBatch.macs[i]) :
+                typeof definedFirstMac === 'number' ? definedFirstMac + i : undefined;
             const deviceInfo = await this.getNewDeviceInfo(
                 devicesNumber + i,
                 allSn,
-                typeof definedFirstMac === 'number' ? definedFirstMac + i : undefined
+                predefinedMac
             );
             if (!deviceInfo.mac) {
                 throw new HttpError(409, 'Creation mac error');
@@ -163,5 +166,9 @@ export class DeviceService {
         if (!isMacSequenceAvailable) {
             throw new HttpError(409, 'MAC addresses are not available');
         }
+    }
+
+    public async doesMacExist(mac: string): Promise<boolean> {
+        return this.deviceRepository.doesMacExist(mac);
     }
 }

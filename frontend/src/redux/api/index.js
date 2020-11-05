@@ -1,85 +1,94 @@
 import axios from 'axios';
+import store from '../store';
+import { logout as logoutAction } from '../actions';
+
 const BASE_URL = 'https://cert.imatrixsys.com/api';
 export const HEADER_TOKEN = 'x-auth-token';
 
-export const login = async (email = '', password = '') => {
-  const { data } = await axios.post(`${BASE_URL}/login`, {name: email, password});
-  return data;
-};
+const getToken = () => store.getState().auth.token;
+const logout = () => store.dispatch(logoutAction());
 
-export const getProducts = async (token) => {
-  const {data} = await axios.get(
-    `${BASE_URL}/product`,
-    {
-      headers: {
-        [HEADER_TOKEN]: token
-      }
-    }
-  );
-  return data;
-};
+const GET = 'get';
+const POST = 'post';
+const PUT = 'put';
+const DELETE = 'delete';
 
-export const getBatches = async (token, productId) => {
-  const {data} = await axios.get(
-    `${BASE_URL}/device/batch/all/${productId}`,
-    {
-      headers: {
-        [HEADER_TOKEN]: token
-      }
-    }
-  );
-  return data;
-};
-
-export const createBatch = async (token, productId, amount, type, body) => {
-  const {data} = await axios.post(
-    `${BASE_URL}/device/batch?productId=${productId}&amount=${amount}&type=${type}`,
-    body,
-    {
-      headers: {
-        [HEADER_TOKEN]: token
-      }
-    }
-  );
-  return data;
-};
-
-export const checkMac = async (token, mac, amount) => {
+const request = async (url, funcConstant, data, customHeaders = {}) => {
+  let response;
+  const token = getToken();
+  const headers = { ...customHeaders, [HEADER_TOKEN]: token };
   try {
-    await axios.get(
-      `${BASE_URL}/device/mac/available?amount=${amount}&mac=${mac}`,
-      {
-        headers: {
-          [HEADER_TOKEN]: token
-        }
-      }
+    switch (funcConstant) {
+      case GET:
+        response = await axios.get(url, { headers });
+        break;
+      case POST:
+        response = await axios.post(url, data, { headers });
+        break;
+      case PUT:
+        response = await axios.put(url, data, { headers });
+        break;
+      case DELETE:
+        response = await axios.put(url, data, { headers });
+        break;
+    }
+    return response;
+  } catch (e) {
+    if (e.response.status === 401) {
+      logout();
+      return;
+    }
+    throw e;
+  }
+};
+export const login = async (email = '', password = '') => {
+  const { data } = await axios.post(`${BASE_URL}/login`, { name: email, password });
+  return data;
+};
+
+export const getProducts = async () => {
+  const { data } = await request(`${BASE_URL}/product`, GET);
+  return data;
+};
+
+export const getBatches = async (productId) => {
+  const { data } = await request(`${BASE_URL}/device/batch/all/${productId}`, GET);
+  return data;
+};
+
+export const createBatch = async (productId, amount, type, body) => {
+  const { data } = await request(
+    `${BASE_URL}/device/batch?productId=${productId}&amount=${amount}&type=${type}`,
+    POST,
+    body
+  );
+  return data;
+};
+
+export const checkMac = async (mac, amount) => {
+  try {
+    await request(
+      `${BASE_URL}/device/mac/available?mac=${mac}${amount ? `&amount=${amount}` : ''}`,
+      GET
     );
     return true;
-  } catch(e) {
+  } catch (e) {
     return false;
   }
 };
 
-export const getBatchDevices = async (token, batchId, { from, to }) => {
-  const {data} = await axios.get(
+export const getBatchDevices = async (batchId, { from, to }) => {
+  const { data } = await request(
     `${BASE_URL}/device/batch/${batchId}?from=${from}&to=${to}`,
-    {
-      headers: {
-        [HEADER_TOKEN]: token
-      }
-    }
+    GET
   );
   return data;
 };
 
-export const downloadBatch = async (token, batchId,) => {
-  const response = await axios.get(
+export const downloadBatch = async (batchId) => {
+  const response = await request(
     `${BASE_URL}/device/batch/download/${batchId}`,
-    {
-      headers: {
-        [HEADER_TOKEN]: token
-      }
-    }
+    GET
   );
   const url = window.URL.createObjectURL(new Blob([response.data]));
   const link = document.createElement('a');
@@ -90,14 +99,10 @@ export const downloadBatch = async (token, batchId,) => {
   document.body.removeChild(link);
 };
 
-export const getBatchInfo = async (token, batchId) => {
-  const {data} = await axios.get(
+export const getBatchInfo = async (batchId) => {
+  const { data } = await request(
     `${BASE_URL}/device/batch/info/${batchId}`,
-    {
-      headers: {
-        [HEADER_TOKEN]: token
-      }
-    }
+    GET
   );
   return data;
 };

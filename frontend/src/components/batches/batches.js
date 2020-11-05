@@ -17,10 +17,9 @@ const useStyles = makeStyles({
   }
 });
 
-const Batches = ({auth, match, push}) => {
+const Batches = ({match, push}) => {
   const { params: { productId } } = match;
   const classes = useStyles();
-  const {token} = auth;
   const [loading, setLoading] = useState(true);
   const [batches, setBatches] = useState([]);
   const [open, setOpen] = useState(false);
@@ -29,7 +28,7 @@ const Batches = ({auth, match, push}) => {
   useEffect(() => {
     (async() => {
       try{
-        const batchesResponse = await getBatches(token, productId);
+        const batchesResponse = await getBatches(productId);
         setBatches(batchesResponse)
       } catch (e) {
         console.log(e);
@@ -93,17 +92,12 @@ const Batches = ({auth, match, push}) => {
         closeModal={closeModal}
         batchType={batchType}
         productId={productId}
-        token={token}
       />
     </BackgroundBox>
   )
 };
 
-const mapStateToProps = ({ auth}) => ({
-  auth,
-});
-
 export default compose(
-  connect(mapStateToProps, {push}),
+  connect(null, {push}),
   withRouter
 )(Batches);

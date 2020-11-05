@@ -167,4 +167,11 @@ export class DeviceRepository {
         const [ rows ] = await knex.raw(sql);
         return rows.map((r: any) => r.sn);
     }
+
+    public async doesMacExist(mac: string): Promise<boolean> {
+        const knex = await this.dbProvider.createDbConnection(this.dbName);
+        const sql = 'select * from device where mac = ?';
+        const [ rows ] = await knex.raw(sql, [mac]);
+        return rows.length !== 0;
+    }
 }

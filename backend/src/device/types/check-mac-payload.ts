@@ -4,7 +4,7 @@ import {MAX_DEVICES_AMOUNT} from "../../constants";
 
 const schema = Joi.object({
     mac: macAddressSchema,
-    amount: Joi.number().max(MAX_DEVICES_AMOUNT)
+    amount: Joi.number().max(MAX_DEVICES_AMOUNT).optional()
 });
 export class CheckMacPayload {
     public mac!: string;

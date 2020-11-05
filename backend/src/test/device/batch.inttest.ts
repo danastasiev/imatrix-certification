@@ -117,8 +117,7 @@ describe('Device batches test', () => {
 
     it('Get batches for non existence product test', async () => {
         const getBatchesResponse = await DeviceApi.getAllBatches(authToken, 'nonexistenceId');
-        expect(getBatchesResponse.status).toBe(200);
-        expect(getBatchesResponse.data).toHaveLength(0);
+        expect(getBatchesResponse.status).toBe(409);
     });
 
     it('Download batch test', async () => {

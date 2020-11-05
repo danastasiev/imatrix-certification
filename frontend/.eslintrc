@@ -146,7 +146,7 @@ rules:
   func-names: [1, "never"]
   func-style: ["error", "declaration", { "allowArrowFunctions": true }]
   id-blacklist: 1
-  indent: [1, 4, {"SwitchCase": 1}]
+  indent: [1, 2, {"SwitchCase": 1}]
   jsx-quotes: [1, "prefer-single"]
   keyword-spacing: 1
   linebreak-style: 0
@@ -159,7 +159,7 @@ rules:
   new-cap: [1, {"capIsNewExceptions": ["List", "Map"]}]
   new-parens: 1
   newline-after-var: 0
-  newline-before-return: 1
+  newline-before-return: 0
   newline-per-chained-call: 0
   no-array-constructor: 1
   no-bitwise: 1

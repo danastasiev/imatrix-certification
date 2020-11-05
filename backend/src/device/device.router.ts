@@ -39,9 +39,10 @@ export class DeviceRouter {
         @QueryParam('amount') amount: number,
         @QueryParam('type', { required: false }) type: BatchType = BatchType.WIFI,
         @BodyParam('description', { required: false }) description?: string,
-        @BodyParam('firstMac', { required: false }) firstMac?: string
+        @BodyParam('firstMac', { required: false }) firstMac?: string,
+        @BodyParam('macs', { required: false }) macs?: string[]
     ): Promise<IBatch>{
-       const payload = new CreateBatch({ productId, amount, type, description, firstMac });
+       const payload = new CreateBatch({ productId, amount, type, description, firstMac, macs });
        const product = await this.productService.getProduct(payload.productId);
        if (product === null) {
            throw new HttpError(409, `Product does not exist, id=${payload.productId}`);
@@ -127,10 +128,17 @@ export class DeviceRouter {
     @OnUndefined(200)
     public async checkMacSequence(
         @QueryParam('mac') mac: string,
-        @QueryParam('amount') amount: number
+        @QueryParam('amount', { required: false }) amount?: number
     ): Promise<void> {
         const payload = new CheckMacPayload({ mac, amount });
-        await this.deviceService.checkMacSequence(payload.mac, payload.amount);
+        if (amount) {
+            await this.deviceService.checkMacSequence(payload.mac, payload.amount);
+        } else {
+            const macExists = await this.deviceService.doesMacExist(payload.mac);
+            if (macExists) {
+                throw new HttpError(409, 'Mac already exists');
+            }
+        }
     }
 
 }
