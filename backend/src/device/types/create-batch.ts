@@ -26,5 +26,13 @@ export class CreateBatch {
         if (this.type === BatchType.BLE && (!this.firstMac && !this.macs)) {
             throw new HttpError(400, 'For creation BLE batch fist mac address or list of macs addresses have to be specified');
         }
+        if (this.macs) {
+            if (this.macs.length !== [...new Set(this.macs)].length) {
+                throw new HttpError(400, 'Specified mac addresses are not unique');
+            }
+            if (this.macs.length !== this.amount) {
+                throw new HttpError(400, 'Number of specified mac addresses must be equal amount parameter');
+            }
+        }
     }
 }

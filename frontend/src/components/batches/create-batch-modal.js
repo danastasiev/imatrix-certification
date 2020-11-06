@@ -24,6 +24,11 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
 
   const isBLE = batchType === BLE;
 
+  const closeModalHandler = () => {
+    closeModal();
+    setAmount('');
+  };
+
   const createBatch = async () => {
     try {
       setLoading(true);
@@ -44,7 +49,7 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
           : { description }
       );
       addBatch({ ...batch, registered: amount, activated: 0 });
-      closeModal();
+      closeModalHandler();
     } catch (e) {
       console.log(e);
     } finally {
@@ -70,7 +75,7 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
   };
 
   return (
-    <Dialog open = { open } onClose = { closeModal }>
+    <Dialog open = { open } onClose = { closeModalHandler }>
       <DialogTitle>Create batch</DialogTitle>
       <DialogContent>
         <Box height = { isBLE ? 400 : 270 } width = { 550 }>
@@ -113,7 +118,7 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
           </Box>
         </DialogContent>
       <DialogActions>
-        <Button color = 'primary' onClick = { closeModal }>
+        <Button color = 'primary' onClick = { closeModalHandler }>
           Cancel
           </Button>
         <Button color = 'primary' disabled = { isDisabled() || loading } onClick = { createBatch }>

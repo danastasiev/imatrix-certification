@@ -37,7 +37,7 @@ export const BleMacSection = ({
                 disabled = { loading }
             />
           }
-            label = 'Sequenced MACs'
+            label = 'Set sequence'
             labelPlacement = 'top'
         />
           <FormControlLabel
