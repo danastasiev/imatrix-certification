@@ -18,12 +18,16 @@ export class AppHolder {
   public port: number;
   private routers: Function[];
   private frontend: boolean;
+  private crtPath: string;
+  private keyPath: string;
 
-  constructor(port: number, routers: Function[], frontend = false) {
+  constructor(port: number, routers: Function[], crtPath: string, keyPath: string, frontend = false) {
       this.app = express();
       this.port = port;
       this.routers = routers;
       this.frontend = frontend;
+      this.crtPath = crtPath;
+      this.keyPath = keyPath;
       this.init()
   }
   private init(): void {
@@ -58,12 +62,10 @@ export class AppHolder {
   }
 
   public start(): void {
-    const certPath = path.resolve(__dirname, '../certs/server.crt');
-    const keyPath = path.resolve(__dirname, '../certs/server.key');
     const server = https.createServer(
         {
-          cert: fs.readFileSync(certPath, 'utf8'),
-          key: fs.readFileSync(keyPath, 'utf8')
+          cert: fs.readFileSync(this.crtPath, 'utf8'),
+          key: fs.readFileSync(this.keyPath, 'utf8')
         },
         this.app
     );

@@ -8,6 +8,7 @@ import {AuthRouter} from "./auth/auth.router";
 import {InternalRouter} from "./internal/internal.router";
 import {DeviceRouter} from "./device/device.router";
 import {ProductRouter} from "./product/product.router";
+import * as path from "path";
 
 const setupTestEnvironment = async (): Promise<void> => {
     await Container.get(DBProvider).runInitialTestSchemaMigration();
@@ -31,13 +32,24 @@ const setupDevelopmentEnvironment = async(): Promise<void> => {
         } else {
             await setupDevelopmentEnvironment();
         }
-        const mainApp = new AppHolder(PORT, [
+        const mainApp = new AppHolder(
+            PORT,
+            [
             CertsRouter,
             AuthRouter,
             DeviceRouter,
             ProductRouter
-        ], true);
-        const internalApp = new AppHolder(INTERNAL_PORT, [InternalRouter]);
+            ],
+            path.resolve(__dirname, '../certs/server.crt'),
+            path.resolve(__dirname, '../certs/server.key'),
+            true
+        );
+        const internalApp = new AppHolder(
+            INTERNAL_PORT,
+            [InternalRouter],
+            path.resolve(__dirname, '../certs/internal-server.crt'),
+            path.resolve(__dirname, '../certs/internal-server.key')
+        );
         mainApp.start();
         internalApp.start();
 
