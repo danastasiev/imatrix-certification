@@ -174,4 +174,17 @@ export class DeviceRepository {
         const [ rows ] = await knex.raw(sql, [mac]);
         return rows.length !== 0;
     }
+
+    public async getDevicesByMacAddresses(macs: string[]): Promise<IDevice[]> {
+        const knex = await this.dbProvider.createDbConnection(this.dbName);
+        const sql = `select * from device where mac in (${macs.map(() => '?').join(',')})`;
+        const [ rows ] = await knex.raw(sql, macs);
+        return rows.map((device:any) => ({
+            cpuId: device.cpuid,
+            productId: device.product_id,
+            sn: device.sn,
+            mac: device.mac,
+            pw: device.pw
+        }));
+    }
 }

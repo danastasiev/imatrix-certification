@@ -1,4 +1,5 @@
 import {Service} from "typedi";
+import * as es from 'event-stream';
 import {DeviceRepository} from "./device.repository";
 import {IBindResponse} from "./types/bind-response";
 import {HttpError} from "routing-controllers";
@@ -10,6 +11,10 @@ import {IBatchInfo} from "./types/batch-info";
 import {Parser} from 'json2csv';
 import {IDevice} from "./types/device.model";
 import {generateSn} from "../test/random-utils";
+import {CreateBatchFromFile} from "./types/create-batch-from-file";
+import {macAddressSchema} from "../joi/utils";
+import {BatchType} from "./types/batch-type";
+import {Request} from "express";
 
 @Service()
 export class DeviceService {
@@ -93,7 +98,7 @@ export class DeviceService {
         return password;
     }
 
-    public async createNewBatch(createBatch: CreateBatch): Promise<IBatch> {
+    public async createNewBatch(createBatch: CreateBatch): Promise<IBatchInfo> {
         const batch = await this.deviceRepository.createBatch(createBatch);
         const devicesNumber = await this.deviceRepository.getDevicesCount();
         const batchDevicesRelations = [];
@@ -125,7 +130,7 @@ export class DeviceService {
             allSn.push(deviceInfo.serialNumber);
         }
         await this.deviceRepository.createBatchOfDevices( batchDevicesRelations, batchDevicesForDb);
-        return batch;
+        return this.getBatchInfo(batch.productId, batch.id);
     }
 
     public async getBatchDevices(payload: GetBatchDevices): Promise<IBatchResponse> {
@@ -170,5 +175,60 @@ export class DeviceService {
 
     public async doesMacExist(mac: string): Promise<boolean> {
         return this.deviceRepository.doesMacExist(mac);
+    }
+
+    private isMacValid(mac: string): boolean {
+        const { error } = macAddressSchema.validate(mac);
+        return !error;
+    }
+    private async getMacAddressesFromFile(
+        stream: Request
+    ): Promise<string[]> {
+        const res: string[] = [];
+        const fileReading = new Promise((res, rej) => {
+            stream.on('end', () => res());
+            stream.on('error', (err) => rej(err));
+        });
+        const readLineStream = es.mapSync( (line = '') => {
+            const trimmedLine = line.trim();
+            if(trimmedLine) {
+                const macValid = this.isMacValid(trimmedLine);
+                if (!macValid) {
+                    stream.emit('error', new HttpError(409, `File is not valid, ${trimmedLine} - is not valid mac address`));
+                    readLineStream.destroy();
+                }
+                res.push(trimmedLine);
+            }
+        });
+        stream
+            .pipe(es.split())
+            .pipe(readLineStream);
+
+        await fileReading;
+        if (res.length === 0) {
+            throw new HttpError(409, 'File does not contain mac addresses');
+        }
+        return res;
+    }
+
+    public async createBatchFromFile(
+        stream: Request,
+        payload: CreateBatchFromFile
+    ): Promise<IBatchInfo> {
+        const macStrings = await this.getMacAddressesFromFile(stream);
+        const allocatedDevices = await this.deviceRepository.getDevicesByMacAddresses(macStrings);
+        if (allocatedDevices.length !== 0) {
+            throw new HttpError(409, `MAC addresses already allocated: ${allocatedDevices.map((d: IDevice) => d.mac).join(',')}`)
+        }
+
+        return this.createNewBatch(
+            new CreateBatch({
+                amount: macStrings.length,
+                productId: payload.productId,
+                description: payload.description,
+                type: BatchType.BLE,
+                macs: macStrings
+            })
+        );
     }
 }

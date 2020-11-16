@@ -7,11 +7,12 @@ import {
     Param,
     Post,
     QueryParam,
+    Req,
     Res,
     UseBefore
 } from "routing-controllers";
 import * as Joi from "joi";
-import {Response} from 'express';
+import {Response, Request} from 'express';
 import {DeviceService} from "./device.service";
 import {IBatch} from "./types/batch.model";
 import {jwtVerificationMiddleware} from "../middlewares/jwt.middlware";
@@ -24,6 +25,7 @@ import {IBatchInfo} from "./types/batch-info";
 import {validatePayload} from "../joi/utils";
 import {BatchType} from "./types/batch-type";
 import {CheckMacPayload} from "./types/check-mac-payload";
+import {CreateBatchFromFile} from "./types/create-batch-from-file";
 
 @Controller('/device')
 export class DeviceRouter {
@@ -34,14 +36,14 @@ export class DeviceRouter {
 
     @Post('/batch')
     @UseBefore(jwtVerificationMiddleware)
-    public async sign(
+    public async createBatch(
         @QueryParam('productId') productId: string,
         @QueryParam('amount') amount: number,
         @QueryParam('type', { required: false }) type: BatchType = BatchType.WIFI,
         @BodyParam('description', { required: false }) description?: string,
         @BodyParam('firstMac', { required: false }) firstMac?: string,
         @BodyParam('macs', { required: false }) macs?: string[]
-    ): Promise<IBatch>{
+    ): Promise<IBatchInfo>{
        const payload = new CreateBatch({ productId, amount, type, description, firstMac, macs });
        const product = await this.productService.getProduct(payload.productId);
        if (product === null) {
@@ -52,6 +54,18 @@ export class DeviceRouter {
        }
        return this.deviceService.createNewBatch(payload);
     }
+
+    @Post('/batch/upload')
+    @UseBefore(jwtVerificationMiddleware)
+    public async creatBatchFromFile(
+        @Req() req: Request
+    ): Promise<IBatchInfo>{
+        const { productid, description } = req.headers;
+        const payload = new CreateBatchFromFile({ description, productId: productid });
+        return this.deviceService.createBatchFromFile(req, payload);
+    }
+
+
     @Get('/batch/:batchId')
     @UseBefore(jwtVerificationMiddleware)
     public async getBatchDevices(

@@ -106,3 +106,17 @@ export const getBatchInfo = async (batchId) => {
   );
   return data;
 };
+
+export const createBatchFromFile = async (file, productId, description) => {
+  const { data } = await request(
+    `${BASE_URL}/device/batch/upload`,
+    POST,
+    file,
+    {
+      description,
+      'Content-Type': 'multipart/form-data',
+      productid: productId
+    }
+  );
+  return data;
+};

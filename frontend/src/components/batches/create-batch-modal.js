@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { checkMac, createBatch as createApi } from '../../redux/api';
+import { checkMac, createBatch as createApi, createBatchFromFile } from '../../redux/api';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -11,6 +11,8 @@ import { BLE, WIFI } from './constants';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { BleMacSection } from './ble-mac-section';
 import { MANUAL, SEQUENCE, validateMacStructure } from './utils';
+import { UploadFileSection } from './upload-file-section';
+import Typography from '@material-ui/core/Typography';
 
 
 export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, productId }) => {
@@ -19,20 +21,25 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
   const [amount, setAmount] = useState('');
   const [mac, setMac] = useState('');
   const [incorrectMac, setIncorrectMac] = useState('');
+  const [creationError, setCreationError] = useState('');
   const [bleMacMode, setBleMacMode] = useState(SEQUENCE);
   const [validMacs, setValidMacs] = useState([]);
+  const [file, setFile] = useState(null);
 
   const isBLE = batchType === BLE;
 
   const closeModalHandler = () => {
     closeModal();
     setAmount('');
+    setCreationError('');
   };
+  const fileWasSet = file !== null;
 
   const createBatch = async () => {
     try {
       setLoading(true);
-      if (isBLE && bleMacMode === SEQUENCE) {
+      setCreationError('');
+      if (!fileWasSet && isBLE && bleMacMode === SEQUENCE) {
         const macCorrect = await checkMac(mac, amount);
         if (!macCorrect) {
           setIncorrectMac(mac);
@@ -41,17 +48,24 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
           return;
         }
       }
-      const batch = await createApi(
-        productId,
-        amount,
-        batchType,
-        isBLE ? bleMacMode === MANUAL ? { description, macs: validMacs} : { description, firstMac: mac }
-          : { description }
-      );
-      addBatch({ ...batch, registered: amount, activated: 0 });
+      let batch;
+      if (fileWasSet) {
+        batch = await createBatchFromFile(file, productId, description);
+      } else {
+        batch = await createApi(
+          productId,
+          amount,
+          batchType,
+          isBLE ? bleMacMode === MANUAL ? { description, macs: validMacs } : { description, firstMac: mac }
+            : { description }
+        );
+      }
+      addBatch({ ...batch });
       closeModalHandler();
     } catch (e) {
-      console.log(e);
+      if (e.isAxiosError) {
+        setCreationError(e.response.data.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -66,6 +80,9 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
     if (batchType === WIFI) {
       return !amount || amountSetIncorrectly;
     }
+    if (fileWasSet) {
+      return false;
+    }
 
     if (bleMacMode === MANUAL) {
       return !amount || validMacs.length !== Number(amount);
@@ -79,8 +96,19 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
       <DialogTitle>Create batch</DialogTitle>
       <DialogContent>
         <Box height = { isBLE ? 400 : 270 } width = { 550 }>
+          { creationError && (
+            <Box>
+              <Typography color = 'error'>{ creationError } </Typography>
+            </Box>
+          ) }
+          { isBLE && (
+            <Box>
+              <UploadFileSection loading = { loading } setFile = { setFile } />
+              <Box mt = { 2 }><Typography>OR</Typography></Box>
+          </Box>
+          )}
           <TextField
-            disabled = { loading }
+            disabled = { loading || fileWasSet }
             autoFocus
             margin = 'dense'
             label = 'Number of devices'
@@ -93,7 +121,7 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
           {
             isBLE && (
               <BleMacSection
-                loading = { loading }
+                loading = { loading || fileWasSet }
                 showValidationError = { showValidationError }
                 setMac = { setMac }
                 amount = { amount }
