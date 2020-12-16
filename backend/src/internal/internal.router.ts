@@ -48,20 +48,38 @@ export class InternalRouter {
         return this.deviceService.bindDevice(payload.cpuId, payload.productId);
     }
 
-    @Post('/device/bind')
+    @Get('/device/bind/activate')
     @OnUndefined(200)
     public async activateDevice(
         @QueryParam('cpuId') cpuId: string,
+        @QueryParam('productId') productId: string,
         @QueryParam('sn') sn: string,
-    ): Promise<void> {
-        const payload = new ActivatePayload({ cpuId, sn });
+        @QueryParam('mac') mac: string
+    ): Promise<IBindResponse> {
+        const payload = new ActivatePayload({ cpuId, productId, sn, mac });
         const device = await this.deviceService.getDeviceBySN(payload.sn);
         if ( device === null ) {
             throw new HttpError(409, `Device does not exist, sn=${payload.sn}`);
         }
-        if (device.cpuId !== null) {
-            throw new HttpError(409, `Device has been already activated`);
+        if (device.mac !== payload.mac) {
+            throw new HttpError(409, `Device with sn ${payload.sn} has already allocated with other mac address ${device.mac}`);
+        }
+        if (device.cpuId) {
+            if (device.cpuId === payload.cpuId) {
+                return {
+                    sn: device.sn,
+                    mac: device.mac,
+                    pw: device.pw
+                }
+            } else {
+                throw new HttpError(409, `Device with sn ${payload.sn} has already allocated with other cpu id`);
+            }
         }
         await this.deviceService.activateDevice(payload.cpuId, payload.sn);
+        return {
+            sn: device.sn,
+            mac: device.mac,
+            pw: device.pw
+        }
     }
 }
