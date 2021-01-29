@@ -153,7 +153,11 @@ export class DeviceService {
 
     public async getBatchCsv(batchId: string): Promise<string> {
         const batchDevices = await this.deviceRepository.getDevicesFromBatch(batchId);
-        const dataForCsv = batchDevices.map(d => ({ ['Serial Number']: d.sn, ['Mac Address']: d.mac}));
+        const dataForCsv = batchDevices.map(d => ({
+            ['Serial Number']: d.sn,
+            ['Mac Address']: d.mac,
+            ['QR Content']: `app.imatrixsys.com/app?sn=${d.sn}&mac=${d.mac}`
+        }));
         const json2csvParser = new Parser();
         return json2csvParser.parse(dataForCsv);
     }
