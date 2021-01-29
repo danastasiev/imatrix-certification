@@ -160,7 +160,7 @@ export class DeviceService {
         const dataForCsv = batchDevices.map(d => ({
             ['Serial Number']: d.sn,
             ['Mac Address']: d.mac,
-            ['QR Content']: `${this.configService.getBaseUrl()}/app?sn=${d.sn}&mac=${d.mac}`
+            ['QR Content']: `${this.configService.getBaseCloudHostUrl()}/app?sn=${d.sn}&mac=${d.mac}`
         }));
         const json2csvParser = new Parser();
         return json2csvParser.parse(dataForCsv);
