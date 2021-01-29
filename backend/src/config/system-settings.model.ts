@@ -1,3 +1,4 @@
 export interface SystemSettings {
-    db: {host: string; user: string; password: string}
+    db: {host: string; user: string; password: string},
+    cloudHost: {baseUrl: string}
 }

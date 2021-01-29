@@ -1,4 +1,4 @@
-import {Service} from "typedi";
+import {Container, Service} from "typedi";
 import * as es from 'event-stream';
 import {DeviceRepository} from "./device.repository";
 import {IBindResponse} from "./types/bind-response";
@@ -15,6 +15,7 @@ import {CreateBatchFromFile} from "./types/create-batch-from-file";
 import {macAddressSchema} from "../joi/utils";
 import {BatchType} from "./types/batch-type";
 import {Request} from "express";
+import {ConfigService} from "../config";
 
 @Service()
 export class DeviceService {
@@ -24,8 +25,11 @@ export class DeviceService {
     private readonly MAC_END = 0x00068BFFFFFF;
 
     constructor(
-        private readonly deviceRepository: DeviceRepository
-    ) {}
+        private readonly deviceRepository: DeviceRepository,
+        private readonly configService: ConfigService
+    ) {
+        this.configService = Container.get(ConfigService);
+    }
 
     public doesDeviceExist(sn: string, mac: string): Promise<boolean> {
         return this.deviceRepository.doesDeviceExist(sn, mac);
@@ -156,7 +160,7 @@ export class DeviceService {
         const dataForCsv = batchDevices.map(d => ({
             ['Serial Number']: d.sn,
             ['Mac Address']: d.mac,
-            ['QR Content']: `app.imatrixsys.com/app?sn=${d.sn}&mac=${d.mac}`
+            ['QR Content']: `${this.configService.getBaseUrl()}/app?sn=${d.sn}&mac=${d.mac}`
         }));
         const json2csvParser = new Parser();
         return json2csvParser.parse(dataForCsv);

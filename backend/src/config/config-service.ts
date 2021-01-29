@@ -28,4 +28,7 @@ export class ConfigService {
     public getDbPassword (): string {
         return this.systemSettings.db.password;
     }
+    public getBaseUrl(): string {
+        return this.systemSettings.cloudHost.baseUrl
+    }
 }
