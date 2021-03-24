@@ -28,6 +28,6 @@ export function generateNumber(): string {
 }
 
 export function generateSn(): string{
-    const nonZeroFilled = String(Math.floor(Math.random() * 10000000000));
+    const nonZeroFilled = String(Math.floor(Math.random() * 1000000000));
     return nonZeroFilled.padStart(10, '0');
 }
