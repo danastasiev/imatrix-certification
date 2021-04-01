@@ -18,9 +18,9 @@ export class AuthService {
     }
 
     public getToken(user: User): string {
-        const { name } = user;
+        const { email } = user;
         const token =  sign({
-            data: { name}
+            data: { email}
         }, SECRET, { expiresIn: '24h' });
         return new Buffer(token).toString('base64');
     }

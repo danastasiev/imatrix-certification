@@ -12,10 +12,10 @@ export class AuthRouter {
 
     @Post('/login')
     public async login(
-        @Body() body: {name: string; password: string}
+        @Body() body: {email: string; password: string}
     ): Promise<{token: string}>{
         const payload = new User(body);
-        const user = await this.userService.getUser(payload.name);
+        const user = await this.userService.getUser(payload.email);
         if (user === null) {
             throw new HttpError(401, 'Invalid credentials');
         }

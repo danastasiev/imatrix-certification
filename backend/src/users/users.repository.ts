@@ -11,9 +11,9 @@ export class UsersRepository {
         private readonly dbProvider: DBProvider
     ) {}
 
-    public async getUser(name: string): Promise<User | null> {
+    public async getUser(email: string): Promise<User | null> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
-        const resp = await knex.raw('select name, pass as password from users where name=?;', [name]);
+        const resp = await knex.raw('select email, password from users where email=?;', [email]);
         const [ rows ] = resp;
         if (rows.length) {
             return new User(rows[0]);

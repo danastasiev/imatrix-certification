@@ -20,8 +20,8 @@ export class AuthUtils {
 
     public async createUser(user: User): Promise<void> {
         const knex = await this.db.createDbConnection(IMATRIX_DB_NAME_TEST);
-        const { name, password } = user;
-        await knex.raw('insert into users(name, pass) values (?, ?);', [name, sha512(password)]);
+        const { email, password } = user;
+        await knex.raw('insert into users(name, pass) values (?, ?);', [email, sha512(password)]);
     }
 
     public async createAndLoginUser(basicName = randomString()): Promise<{token: string; user: User}> {

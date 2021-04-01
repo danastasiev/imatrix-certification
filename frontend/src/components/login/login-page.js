@@ -92,7 +92,7 @@ const LoginPage = ({authSuccess}) => {
             fullWidth
             helperText={email}
             error={Boolean(email)}
-            label="Username"
+            label="Email"
             onChange={(e) => setEmail(e.target.value)}
             disabled={loginLoading}
           />

@@ -42,7 +42,7 @@ const request = async (url, funcConstant, data, customHeaders = {}) => {
   }
 };
 export const login = async (email = '', password = '') => {
-  const { data } = await axios.post(`${BASE_URL}/login`, { name: email, password });
+  const { data } = await axios.post(`${BASE_URL}/login`, { email, password });
   return data;
 };
 
