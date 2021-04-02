@@ -16,16 +16,14 @@ describe('Test bind operation', () => {
         const productId = randomString();
         let bindResponse = await DeviceApi.bind(cpuId, productId);
         expect(bindResponse.status).toBe(200);
-        const { mac, sn, pw } = bindResponse.data;
+        const { mac, sn } = bindResponse.data;
         expect(mac).toBeDefined();
-        expect(pw).toBeDefined();
         expect(sn).toBeDefined();
         bindResponse = await DeviceApi.bind(cpuId, productId);
         expect(bindResponse.status).toBe(200);
         expect(bindResponse.data).toBeDefined();
         expect(sn).toBe(bindResponse.data.sn);
         expect(mac).toBe(bindResponse.data.mac);
-        expect(pw).toBe(bindResponse.data.pw);
     });
 
     it('Check response for different cpuId and productId', async () => {
@@ -33,9 +31,8 @@ describe('Test bind operation', () => {
         const productId = randomString();
         let bindResponse = await DeviceApi.bind(cpuId, productId);
         expect(bindResponse.status).toBe(200);
-        const { mac, sn, pw } = bindResponse.data;
+        const { mac, sn } = bindResponse.data;
         expect(mac).toBeDefined();
-        expect(pw).toBeDefined();
         expect(sn).toBeDefined();
         const otherCpuId = randomString();
         const otherProductId = randomString();
@@ -44,6 +41,5 @@ describe('Test bind operation', () => {
         expect(bindResponse.data).toBeDefined();
         expect(sn).not.toBe(bindResponse.data.sn);
         expect(mac).not.toBe(bindResponse.data.mac);
-        expect(pw).not.toBe(bindResponse.data.pw);
     });
 });

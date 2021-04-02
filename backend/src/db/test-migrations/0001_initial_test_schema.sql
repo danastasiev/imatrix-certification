@@ -39,7 +39,6 @@ CREATE TABLE IF NOT EXISTS device (
   product_id varchar(50) NOT NULL,
   sn varchar(15) NOT NULL,
   mac varchar(20) NOT NULL,
-  pw varchar(32) NOT NULL,
   PRIMARY KEY (sn)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

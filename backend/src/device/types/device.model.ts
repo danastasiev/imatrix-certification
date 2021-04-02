@@ -3,5 +3,4 @@ export interface IDevice {
     productId: string;
     sn: string;
     mac: string;
-    pw: string;
 }

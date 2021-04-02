@@ -69,7 +69,6 @@ export class InternalRouter {
                 return {
                     sn: device.sn,
                     mac: device.mac,
-                    pw: device.pw
                 }
             } else {
                 throw new HttpError(409, `Device with sn ${payload.sn} has already allocated with other cpu id`);
@@ -78,8 +77,7 @@ export class InternalRouter {
         await this.deviceService.activateDevice(payload.cpuId, payload.sn);
         return {
             sn: device.sn,
-            mac: device.mac,
-            pw: device.pw
+            mac: device.mac
         }
     }
 }

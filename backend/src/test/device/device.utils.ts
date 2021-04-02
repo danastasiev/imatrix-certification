@@ -19,8 +19,7 @@ export class DeviceUtils {
             cpuId: generateNumber(),
             productId: generateNumber(),
             sn: generateNumber(),
-            mac: generateNumber(),
-            pw: generateNumber()
+            mac: generateNumber()
         }
     }
 
@@ -37,9 +36,9 @@ export class DeviceUtils {
     public async createDevice(device: IDevice): Promise<void> {
         const knex = await this.db.createDbConnection(BIND_DB_NAME_TEST);
         await knex.raw(
-            `insert into device(product_id, sn, mac, pw${device.cpuId ? ', cpuid' : ''}) values(?,?,?,?${device.cpuId ? ',?' : ''});`,
-            device.cpuId ? [device.productId, device.sn, device.mac, device.pw, device.cpuId] :
-                [device.productId, device.sn, device.mac, device.pw]
+            `insert into device(product_id, sn, mac${device.cpuId ? ', cpuid' : ''}) values(?,?,?${device.cpuId ? ',?' : ''});`,
+            device.cpuId ? [device.productId, device.sn, device.mac, device.cpuId] :
+                [device.productId, device.sn, device.mac]
         );
     }
     public async clearProducts(): Promise<void> {

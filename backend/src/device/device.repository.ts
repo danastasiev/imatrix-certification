@@ -26,9 +26,9 @@ export class DeviceRepository {
     public async saveNewDevice(device: IDevice): Promise<void> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
         await knex.raw(
-            `insert into device(product_id, sn, mac, pw${device.cpuId ? ', cpuid' : ''}) values(?,?,?,?${device.cpuId ? ',?' : ''});`,
-            device.cpuId ? [device.productId, device.sn, device.mac, device.pw, device.cpuId] :
-                [device.productId, device.sn, device.mac, device.pw]
+            `insert into device(product_id, sn, mac${device.cpuId ? ', cpuid' : ''}) values(?,?,?${device.cpuId ? ',?' : ''});`,
+            device.cpuId ? [device.productId, device.sn, device.mac, device.cpuId] :
+                [device.productId, device.sn, device.mac]
         );
     }
     public async activateDevice(cpuId: string, serialNumber: string): Promise<void> {
@@ -43,8 +43,7 @@ export class DeviceRepository {
                 cpuId: d.cpuid,
                 productId: d.product_id,
                 sn: d.sn,
-                mac: d.mac,
-                pw: d.pw
+                mac: d.mac
             };
     }
     public async getDeviceByCpuIdAndProductId(cpuId: string, productId: string): Promise<IDevice | null> {
@@ -84,7 +83,7 @@ export class DeviceRepository {
 
     public async createBatchOfDevices(
         batchDevicesRelations: {sn: string; batch_id: string}[],
-        batchDevicesForDb: { product_id: string; sn: string; mac: string; pw: string }[]
+        batchDevicesForDb: { product_id: string; sn: string; mac: string}[]
     ): Promise<void> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
         await knex('device').insert(batchDevicesForDb);
@@ -102,8 +101,7 @@ export class DeviceRepository {
             cpuId: device.cpuid,
             productId: device.product_id,
             sn: device.sn,
-            mac: device.mac,
-            pw: device.pw
+            mac: device.mac
         }));
     }
 
@@ -183,8 +181,7 @@ export class DeviceRepository {
             cpuId: device.cpuid,
             productId: device.product_id,
             sn: device.sn,
-            mac: device.mac,
-            pw: device.pw
+            mac: device.mac
         }));
     }
 }

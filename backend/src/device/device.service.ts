@@ -69,8 +69,7 @@ export class DeviceService {
         if (existenceDevice) {
             return {
                 sn: existenceDevice.sn,
-                mac: existenceDevice.mac,
-                pw: existenceDevice.pw
+                mac: existenceDevice.mac
             }
         }
         const devicesNumber = await this.deviceRepository.getDevicesCount();
@@ -83,14 +82,12 @@ export class DeviceService {
             mac,
             cpuId,
             productId,
-            sn: serialNumber,
-            pw: radiusPassword
+            sn: serialNumber
         };
         await this.deviceRepository.saveNewDevice(newDevice);
         return {
             mac,
-            sn: serialNumber,
-            pw: radiusPassword
+            sn: serialNumber
         }
     }
 
@@ -124,8 +121,7 @@ export class DeviceService {
             batchDevicesForDb.push({
                 product_id: createBatch.productId,
                 sn: deviceInfo.serialNumber,
-                mac: deviceInfo.mac,
-                pw: deviceInfo.radiusPassword
+                mac: deviceInfo.mac
             });
             batchDevicesRelations.push({
                 sn: deviceInfo.serialNumber,
