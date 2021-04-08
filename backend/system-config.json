@@ -5,6 +5,6 @@
     "password": "pd7y5qD5crDyvFjO"
   },
   "cloudHost": {
-    "baseUrl": "app.imatrixsys.com"
+    "baseUrl": "https://app.imatrixsys.com"
   }
 }
