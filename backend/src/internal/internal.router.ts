@@ -35,7 +35,7 @@ export class InternalRouter {
             payload.serialNumber,
             payload.manufacturerId);
         this.certsService.removeCsrFile(csrFileName);
-        await this.certsService.saveLog(payload.serialNumber);
+        await this.certsService.saveLog(payload.serialNumber, payload.manufacturerId);
         return cert;
     }
 

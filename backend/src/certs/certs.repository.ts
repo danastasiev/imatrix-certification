@@ -13,9 +13,9 @@ export class CertsRepository {
         private readonly dbProvider: DBProvider
     ) {}
 
-    public async saveLog(sn: string): Promise<void> {
+    public async saveLog(sn: string, orgId: string): Promise<void> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
-        await knex.raw('insert into certs_log(sn) values (?);', [sn]);
+        await knex.raw('insert into certs_log(sn, org_id) values (?, ?);', [sn, orgId]);
     }
 
     public async getLogsBySN(sn: string): Promise<CertLog[]> {

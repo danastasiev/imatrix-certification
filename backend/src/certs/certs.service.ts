@@ -70,8 +70,8 @@ export class CertsService {
         });
     }
 
-    public async saveLog(sn: string): Promise<void> {
-        await this.certsRepository.saveLog(sn);
+    public async saveLog(sn: string, orgId: string): Promise<void> {
+        await this.certsRepository.saveLog(sn, orgId);
     }
 
     public async getLogsBySN(sn: string): Promise<CertLog[]> {
