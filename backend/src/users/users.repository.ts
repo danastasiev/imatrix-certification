@@ -13,7 +13,7 @@ export class UsersRepository {
 
     public async getUser(email: string): Promise<User | null> {
         const knex = await this.dbProvider.createDbConnection(this.dbName);
-        const resp = await knex.raw('select email, password from users where email=?;', [email]);
+        const resp = await knex.raw('select email, password, role from users where email=?;', [email]);
         const [ rows ] = resp;
         if (rows.length) {
             return new User(rows[0]);

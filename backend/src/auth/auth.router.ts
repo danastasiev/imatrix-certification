@@ -21,6 +21,7 @@ export class AuthRouter {
         }
         try{
             const token = this.authService.verify(user, payload.password);
+            if (token === 'No admin rights!') throw new HttpError(403, token);
             return {token};
         } catch {
             throw new HttpError(401, 'Invalid credentials');

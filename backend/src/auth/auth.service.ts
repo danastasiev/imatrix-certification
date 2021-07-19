@@ -9,8 +9,9 @@ import {User} from "../users/types/user.model";
 @Service()
 export class AuthService {
     public verify(user: User, receivedPassword: string): string {
-        const { password } = user;
+        const { password, role } = user;
         const receivedHash = sha512(receivedPassword);
+        if (!role.permissions.includes('SYSTEM:MANAGE')) return 'No admin rights!';
         if (password === receivedHash) {
             return this.getToken(user);
         }
