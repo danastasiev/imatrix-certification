@@ -58,8 +58,8 @@ const LoginPage = ({authSuccess}) => {
       } catch (e) {
         const mess = e.message;
         const code = mess.slice(mess.length-3, mess.length);
-        if (code === '403') setErrors((errors) => ({...errors, password: 'User is not an admin'}) );
-        else setErrors((errors) => ({...errors, password: 'Invalid credentials'}) );
+        const errorMessage = (code === '403') ? 'User is not an admin' : 'Invalid credentials';
+        setErrors((errors) => ({...errors, password: errorMessage}) );
       } finally {
         setLoginLoading(false);
       }

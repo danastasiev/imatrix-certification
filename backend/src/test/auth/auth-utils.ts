@@ -23,7 +23,18 @@ export class AuthUtils {
         const { email, password } = user;
         await knex.raw('insert into users(name, pass) values (?, ?);', [email, sha512(password)]);
     }
-
+    /*
+    public async createAdmin(user: User): Promise<void> {
+        const knex = await this.db.createDbConnection(IMATRIX_DB_NAME_TEST);
+        const { email, password } = user;
+        const role = {
+            id: Math.floor(Math.random() * 9000) + 1000,
+            role: 'SYSTEM:OWNER',
+            permissions: ['SYSTEM:MANAGE']
+        }
+        await knex.raw('insert into users(name, pass, role) values (?, ?, ?);', [email, sha512(password), role]);
+    }
+    */
     public async createAndLoginUser(basicName = randomString()): Promise<{token: string; user: User}> {
         const name = `${generateUniqueName(basicName)}`;
         const password = generateUniqueName(`${basicName}_password`);
