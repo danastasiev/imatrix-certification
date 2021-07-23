@@ -39,15 +39,6 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
     try {
       setLoading(true);
       setCreationError('');
-      if (!fileWasSet && isBLE && bleMacMode === SEQUENCE) {
-        const macCorrect = await checkMac(mac, amount);
-        if (!macCorrect) {
-          setIncorrectMac(mac);
-          setLoading(false);
-
-          return;
-        }
-      }
       let batch;
       if (fileWasSet) {
         batch = await createBatchFromFile(file, productId, description);
@@ -84,10 +75,6 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
       return false;
     }
 
-    if (bleMacMode === MANUAL) {
-      return !amount || validMacs.length !== Number(amount);
-    }
-
     return !amount || !mac || amountSetIncorrectly || showValidationError;
   };
 
@@ -107,7 +94,8 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
               <Box mt = { 2 }><Typography>OR</Typography></Box>
           </Box>
           )}
-          <TextField
+          {
+            !isBLE && (<TextField
             disabled = { loading || fileWasSet }
             autoFocus
             margin = 'dense'
@@ -117,14 +105,15 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
             min = { 1 }
             max = { 5000 }
             onChange = { (e) => setAmount(e.target.value) }
-            />
+            />)
+          }
+          
           {
             isBLE && (
               <BleMacSection
                 loading = { loading || fileWasSet }
                 showValidationError = { showValidationError }
                 setMac = { setMac }
-                amount = { amount }
                 bleMacMode = { bleMacMode }
                 setBleMacMode = { setBleMacMode }
                 setValidMacs = { setValidMacs }

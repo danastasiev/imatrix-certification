@@ -69,11 +69,11 @@ const Batches = ({match, push}) => {
           alignItems="center"
         >
           <Button size="small" color="secondary" variant="contained" onClick={() => openModal(WIFI)}>
-            + New WIFI batch
+          + New Batch with Sequenced MAC Addresses
           </Button>
           <Box ml={2}>
             <Button size="small" color="secondary" variant="contained" onClick={() => openModal(BLE)}>
-              + New BLE batch
+            + New Batch with Ad Hoc MAC Addresses
             </Button>
           </Box>
         </Box>
