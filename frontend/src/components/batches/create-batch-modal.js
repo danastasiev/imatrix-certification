@@ -22,7 +22,6 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
   const [mac, setMac] = useState('');
   const [incorrectMac, setIncorrectMac] = useState('');
   const [creationError, setCreationError] = useState('');
-  const [bleMacMode, setBleMacMode] = useState(SEQUENCE);
   const [validMacs, setValidMacs] = useState([]);
   const [file, setFile] = useState(null);
 
@@ -47,8 +46,7 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
           productId,
           amount,
           batchType,
-          isBLE ? bleMacMode === MANUAL ? { description, macs: validMacs } : { description, firstMac: mac }
-            : { description }
+          isBLE ?  { description, macs: validMacs } : { description }
         );
       }
       addBatch({ ...batch });
@@ -67,15 +65,14 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
   const showValidationError = isBLE && mac && !validateMac(mac);
 
   const isDisabled = () => {
-    const amountSetIncorrectly = amount > 5000 || amount <= 0;
     if (batchType === WIFI) {
+      const amountSetIncorrectly = amount > 5000 || amount <= 0;
       return !amount || amountSetIncorrectly;
     }
     if (fileWasSet) {
       return false;
     }
-
-    return !amount || !mac || amountSetIncorrectly || showValidationError;
+    return !mac || showValidationError;
   };
 
   return (
@@ -114,8 +111,6 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
                 loading = { loading || fileWasSet }
                 showValidationError = { showValidationError }
                 setMac = { setMac }
-                bleMacMode = { bleMacMode }
-                setBleMacMode = { setBleMacMode }
                 setValidMacs = { setValidMacs }
             />
             )
