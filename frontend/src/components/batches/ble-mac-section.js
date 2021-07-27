@@ -5,12 +5,14 @@ import { MacList } from './mac-list';
 export const BleMacSection = ({
   loading,
   setValidMacs,
+  setMac
 }) => {
   return (
       <Box mt = { 2 }>
         <MacList
               setValidMacs = { setValidMacs }
               loading = { loading }
+              setMac = {setMac}
           />
     </Box>
   );

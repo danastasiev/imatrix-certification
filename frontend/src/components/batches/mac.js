@@ -7,11 +7,12 @@ import { validateMacStructure } from './utils';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { checkMac } from '../../redux/api';
 
-export const Mac = ({ id, removeMac, changeMac, mac, loading }) => {
+export const Mac = ({ id, removeMac, changeMac, mac, loading, setMac }) => {
   const [checkLoading, setLoading] = useState(false);
 
 
   const checkMacValidity = async (macValue) => {
+    setMac(macValue);
     if (!validateMacStructure(macValue)) {
       changeMac(id, { valid: false, value: macValue });
       return;
