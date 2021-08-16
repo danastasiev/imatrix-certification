@@ -38,7 +38,7 @@ export class DeviceRouter {
     @UseBefore(jwtVerificationMiddleware)
     public async createBatch(
         @QueryParam('productId') productId: string,
-        @QueryParam('amount') amount: number,
+        @QueryParam('amount') amount?: number,
         @QueryParam('type', { required: false }) type: BatchType = BatchType.WIFI,
         @BodyParam('description', { required: false }) description?: string,
         @BodyParam('firstMac', { required: false }) firstMac?: string,
@@ -48,9 +48,6 @@ export class DeviceRouter {
        const product = await this.productService.getProduct(payload.productId);
        if (product === null) {
            throw new HttpError(409, `Product does not exist, id=${payload.productId}`);
-       }
-       if (payload.firstMac) {
-           await this.deviceService.checkMacSequence(payload.firstMac, payload.amount);
        }
        return this.deviceService.createNewBatch(payload);
     }

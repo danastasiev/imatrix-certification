@@ -106,6 +106,8 @@ export class DeviceService {
         const batchDevicesForDb = [];
         const definedFirstMac = createBatch.firstMac && this.getNumberFromMac(createBatch.firstMac);
         const allSn = await this.deviceRepository.getAllSN();
+        if (!createBatch.amount) 
+            createBatch.amount = createBatch.macs?.length ? createBatch.macs?.length : 0;
         for (let i = 0; i < createBatch.amount; i++) {
             const predefinedMac = createBatch.macs ?
                 this.getNumberFromMac(createBatch.macs[i]) :
@@ -128,7 +130,7 @@ export class DeviceService {
                 batch_id: batch.id
             });
             allSn.push(deviceInfo.serialNumber);
-        }
+            }
         await this.deviceRepository.createBatchOfDevices( batchDevicesRelations, batchDevicesForDb);
         return this.getBatchInfo(batch.productId, batch.id);
     }
