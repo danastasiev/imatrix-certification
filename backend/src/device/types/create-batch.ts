@@ -23,9 +23,6 @@ export class CreateBatch {
     constructor(obj: any) {
         validatePayload(obj, schema);
         assignProperties(obj, this);
-        if (this.type === BatchType.BLE && (!this.macs)) {
-            throw new HttpError(400, 'For creation BLE batch fist mac address or list of macs addresses have to be specified');
-        }
         if (this.macs) {
             if (this.macs.length !== [...new Set(this.macs)].length) {
                 throw new HttpError(400, 'Specified mac addresses are not unique');

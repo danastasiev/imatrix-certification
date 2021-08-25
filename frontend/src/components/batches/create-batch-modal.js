@@ -44,9 +44,8 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
       } else {
         batch = await createApi(
           productId,
-          amount,
           batchType,
-          isBLE ?  { description, macs: validMacs } : { description }
+          isBLE ?  { description, macs: validMacs } : { description, amount }
         );
       }
       addBatch({ ...batch });
