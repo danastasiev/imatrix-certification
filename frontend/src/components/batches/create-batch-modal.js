@@ -22,7 +22,6 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
   const [mac, setMac] = useState('');
   const [incorrectMac, setIncorrectMac] = useState('');
   const [creationError, setCreationError] = useState('');
-  const [bleMacMode, setBleMacMode] = useState(SEQUENCE);
   const [validMacs, setValidMacs] = useState([]);
   const [file, setFile] = useState(null);
 
@@ -39,25 +38,14 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
     try {
       setLoading(true);
       setCreationError('');
-      if (!fileWasSet && isBLE && bleMacMode === SEQUENCE) {
-        const macCorrect = await checkMac(mac, amount);
-        if (!macCorrect) {
-          setIncorrectMac(mac);
-          setLoading(false);
-
-          return;
-        }
-      }
       let batch;
       if (fileWasSet) {
         batch = await createBatchFromFile(file, productId, description);
       } else {
         batch = await createApi(
           productId,
-          amount,
           batchType,
-          isBLE ? bleMacMode === MANUAL ? { description, macs: validMacs } : { description, firstMac: mac }
-            : { description }
+          isBLE ?  { description, macs: validMacs } : { description, amount }
         );
       }
       addBatch({ ...batch });
@@ -76,19 +64,14 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
   const showValidationError = isBLE && mac && !validateMac(mac);
 
   const isDisabled = () => {
-    const amountSetIncorrectly = amount > 5000 || amount <= 0;
     if (batchType === WIFI) {
+      const amountSetIncorrectly = amount > 5000 || amount <= 0;
       return !amount || amountSetIncorrectly;
     }
     if (fileWasSet) {
       return false;
     }
-
-    if (bleMacMode === MANUAL) {
-      return !amount || validMacs.length !== Number(amount);
-    }
-
-    return !amount || !mac || amountSetIncorrectly || showValidationError;
+    return !mac || showValidationError;
   };
 
   return (
@@ -107,7 +90,8 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
               <Box mt = { 2 }><Typography>OR</Typography></Box>
           </Box>
           )}
-          <TextField
+          {
+            !isBLE && (<TextField
             disabled = { loading || fileWasSet }
             autoFocus
             margin = 'dense'
@@ -117,16 +101,15 @@ export const CreateBatchModal = ({ open, closeModal, batchType, addBatch, produc
             min = { 1 }
             max = { 5000 }
             onChange = { (e) => setAmount(e.target.value) }
-            />
+            />)
+          }
+          
           {
             isBLE && (
               <BleMacSection
                 loading = { loading || fileWasSet }
                 showValidationError = { showValidationError }
                 setMac = { setMac }
-                amount = { amount }
-                bleMacMode = { bleMacMode }
-                setBleMacMode = { setBleMacMode }
                 setValidMacs = { setValidMacs }
             />
             )

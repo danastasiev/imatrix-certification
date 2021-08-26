@@ -7,11 +7,12 @@ import { validateMacStructure } from './utils';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { checkMac } from '../../redux/api';
 
-export const Mac = ({ id, removeMac, changeMac, amountDefined, mac, loading }) => {
+export const Mac = ({ id, removeMac, changeMac, mac, loading, setMac }) => {
   const [checkLoading, setLoading] = useState(false);
 
 
   const checkMacValidity = async (macValue) => {
+    setMac(macValue);
     if (!validateMacStructure(macValue)) {
       changeMac(id, { valid: false, value: macValue });
       return;
@@ -30,7 +31,7 @@ export const Mac = ({ id, removeMac, changeMac, amountDefined, mac, loading }) =
       <TextField
         autoFocus
         fullWidth
-        disabled = { loading || !amountDefined }
+        disabled = { loading }
         placeholder = 'Example: 00:11:22:33:44:66'
         onChange = { (e) => checkMacValidity(e.target.value) }
         />
@@ -41,7 +42,7 @@ export const Mac = ({ id, removeMac, changeMac, amountDefined, mac, loading }) =
             disabled = { loading }>
             <Delete />
         </IconButton>
-        )
+        ) 
       }
       {checkLoading ? <CircularProgress size = { 16 } /> : mac.valid ? <Check /> : <ErrorOutline /> }
       </Box>

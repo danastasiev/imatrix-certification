@@ -58,7 +58,7 @@ export const getBatches = async (productId) => {
 
 export const createBatch = async (productId, amount, type, body) => {
   const { data } = await request(
-    `${BASE_URL}/device/batch?productId=${productId}&amount=${amount}&type=${type}`,
+    `${BASE_URL}/device/batch?productId=${productId}${amount ? `&amount=${amount}` : ``}&type=${type}`,
     POST,
     body
   );

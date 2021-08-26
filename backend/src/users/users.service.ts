@@ -10,4 +10,9 @@ export class UsersService {
     public async getUser(email: string): Promise<User | null> {
         return this.usersRepository.getUser(email);
     }
+
+    public async isUserAdmin(user: User): Promise<Boolean | null> {
+        const permissions = user.role.permissions || [];
+        return permissions.includes('SYSTEM:MANAGE');
+    }
 }

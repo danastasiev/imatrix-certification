@@ -3,7 +3,7 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { Mac } from './mac';
 
-export const MacList = ({ amountDefined, amount, setValidMacs, loading }) => {
+export const MacList = ({ setValidMacs, loading, setMac }) => {
   const [macs, setMacs] = useState({ [0]: { value: '', valid: false }});
   const macIds = Object.keys(macs);
   const addMac = () => setMacs({
@@ -42,7 +42,7 @@ export const MacList = ({ amountDefined, amount, setValidMacs, loading }) => {
             mac = { macs[id] }
             removeMac = { removeMac }
             changeMac = { changeMac }
-            amountDefined = { amountDefined }
+            setMac={setMac}
             loading = { loading }
             />
         )}
@@ -50,7 +50,7 @@ export const MacList = ({ amountDefined, amount, setValidMacs, loading }) => {
           <Box mt = { 1 }>
           <Button
             color = 'primary'
-            disabled = { loading || !amountDefined || Number(amount) === macIds.length }
+            disabled = { loading }
             variant = 'outlined'
             onClick = { addMac }>
                 ADD

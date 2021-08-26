@@ -56,8 +56,8 @@ const LoginPage = ({authSuccess}) => {
         const responseData = await login(emailValue, passwordValue);
         authSuccess(responseData);
       } catch (e) {
-        console.log(e);
-        setErrors((errors) => ({...errors, password: 'Invalid credentials'}) );
+        const errorMessage = (e.responce.status === 403) ? 'User is not an admin' : 'Invalid credentials';
+        setErrors((errors) => ({...errors, password: errorMessage}) );
       } finally {
         setLoginLoading(false);
       }

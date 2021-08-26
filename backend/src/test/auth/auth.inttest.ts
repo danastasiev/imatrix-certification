@@ -29,4 +29,8 @@ describe('Basic authentication test', () => {
         loginResponse = await AuthApi.login(user);
         expect(loginResponse.status).toBe(200);
     });
+    it('Ckeck login without admin permissions', async () => {
+        const loginResponse = await AuthApi.login(user);
+        expect(loginResponse.status).toBe(403);
+    });
 });
